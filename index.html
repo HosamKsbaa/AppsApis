@@ -62,65 +62,124 @@
   
   <script>
     window.onload = function() {
-      // Begin Swagger UI call region
-      const ui = SwaggerUIBundle({
-        url: './App1.json', // Your OpenAPI spec file
-        dom_id: '#swagger-ui',
-        deepLinking: true,
-        presets: [
-          SwaggerUIBundle.presets.apis,
-          SwaggerUIStandalonePreset
-        ],
-        plugins: [
-          SwaggerUIBundle.plugins.DownloadUrl
-        ],
-        layout: "StandaloneLayout",
-        // Configuration options
-        tryItOutEnabled: true,
-        requestInterceptor: (request) => {
-          // Add any custom headers or modifications here
-          return request;
-        },
-        responseInterceptor: (response) => {
-          // Handle responses here if needed
-          return response;
-        },
-        // Display operation ID in the UI
-        displayOperationId: false,
-        // Display request duration
-        displayRequestDuration: true,
-        // Default expand/collapse behavior
-        docExpansion: "list", // "list", "full", "none"
-        // Show/hide the filter box
-        filter: true,
-        // Show/hide the header
-        showExtensions: true,
-        // Show/hide vendor extensions
-        showCommonExtensions: true,
-        // OAuth configuration (if needed in the future)
-        oauth2RedirectUrl: window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/oauth2-redirect.html'),
-        // Default model expansion depth
-        defaultModelExpandDepth: 3,
-        // Default models expansion depth
-        defaultModelsExpandDepth: 1,
-        // Syntax highlighting theme
-        syntaxHighlight: {
-          activated: true,
-          theme: "agate"
-        }
-      });
-      // End Swagger UI call regiona
-
-      // Custom JavaScript for additional functionality
-      window.ui = ui;
+      // First, try to load and validate the spec
+      fetch('./App1.json')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Failed to load API spec: ${response.status} ${response.statusText}`);
+          }
+          return response.json();
+        })
+        .then(spec => {
+          // Validate the spec has required fields
+          if (!spec.openapi && !spec.swagger) {
+            throw new Error('Invalid OpenAPI specification: missing version field');
+          }
+          
+          console.log('✅ OpenAPI spec loaded successfully');
+          console.log('Version:', spec.openapi || spec.swagger);
+          console.log('Title:', spec.info?.title);
+          
+          // Initialize Swagger UI with the loaded spec
+          const ui = SwaggerUIBundle({
+            spec: spec, // Use the loaded spec object instead of URL
+            dom_id: '#swagger-ui',
+            deepLinking: true,
+            presets: [
+              SwaggerUIBundle.presets.apis,
+              SwaggerUIStandalonePreset
+            ],
+            plugins: [
+              SwaggerUIBundle.plugins.DownloadUrl
+            ],
+            layout: "StandaloneLayout",
+            // Configuration options
+            tryItOutEnabled: true,
+            requestInterceptor: (request) => {
+              console.log('API Request:', request);
+              return request;
+            },
+            responseInterceptor: (response) => {
+              console.log('API Response:', response);
+              return response;
+            },
+            onComplete: () => {
+              console.log('✅ Swagger UI initialized successfully');
+            },
+            onFailure: (err) => {
+              console.error('❌ Swagger UI initialization failed:', err);
+            },
+            // Display options
+            displayOperationId: false,
+            displayRequestDuration: true,
+            docExpansion: "list",
+            filter: true,
+            showExtensions: true,
+            showCommonExtensions: true,
+            // Model options
+            defaultModelExpandDepth: 3,
+            defaultModelsExpandDepth: 1,
+            // Syntax highlighting
+            syntaxHighlight: {
+              activated: true,
+              theme: "agate"
+            },
+            // Disable validator
+            validatorUrl: null
+          });
+          
+          // Store UI instance globally
+          window.ui = ui;
+          
+        })
+        .catch(error => {
+          console.error('❌ Error loading OpenAPI specification:', error);
+          
+          // Display error message in the UI
+          document.getElementById('swagger-ui').innerHTML = `
+            <div style="max-width: 800px; margin: 50px auto; padding: 30px; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+              <div style="text-align: center; color: #721c24; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 6px; padding: 20px; margin-bottom: 20px;">
+                <h2 style="margin: 0 0 15px 0;">⚠️ Failed to Load API Documentation</h2>
+                <p style="margin: 0; font-weight: bold;">${error.message}</p>
+              </div>
+              
+              <h3 style="color: #1b4332;">🔧 Troubleshooting Steps:</h3>
+              <ol style="color: #333; line-height: 1.6;">
+                <li><strong>Check file location:</strong> Ensure <code>App1.json</code> exists in the same directory as this HTML file</li>
+                <li><strong>Verify JSON syntax:</strong> The OpenAPI specification must be valid JSON</li>
+                <li><strong>Check OpenAPI version:</strong> File must start with <code>"openapi": "3.0.3"</code></li>
+                <li><strong>Browser console:</strong> Press F12 and check the Console tab for detailed errors</li>
+                <li><strong>File permissions:</strong> Ensure the JSON file is readable by the web server</li>
+              </ol>
+              
+              <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 15px; margin: 20px 0;">
+                <h4 style="margin: 0 0 10px 0; color: #495057;">Quick Test:</h4>
+                <p style="margin: 0;">Try opening <a href="./App1.json" target="_blank" style="color: #1b4332;">App1.json</a> directly in your browser to verify it loads correctly.</p>
+              </div>
+              
+              <div style="text-align: center; margin-top: 30px;">
+                <button onclick="window.location.reload()" style="background: #1b4332; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px;">
+                  🔄 Retry Loading
+                </button>
+              </div>
+            </div>
+          `;
+        });
       
-      // Add custom event listeners or modifications here
-      ui.getConfigs = () => {
-        return {
-          ...ui.getConfigs(),
-          // Add any custom configurations
-        }
-      };
+      // Show loading message initially
+      document.getElementById('swagger-ui').innerHTML = `
+        <div style="text-align: center; padding: 50px;">
+          <h3 style="color: #1b4332; margin-bottom: 20px;">Loading Police Officers Club API Documentation...</h3>
+          <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #1b4332; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+          <style>
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          </style>
+          <p style="color: #666; margin-top: 20px;">Loading OpenAPI specification...</p>
+        </div>
+      `;
     };
   </script>
 </body>
