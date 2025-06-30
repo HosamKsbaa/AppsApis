@@ -1,0 +1,116 @@
+name: Deploy Police Club API Documentation
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+# Allow one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  # Build job
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        
+      - name: Validate OpenAPI Spec
+        run: |
+          # Install spectral for OpenAPI validation
+          npm install -g @stoplight/spectral-cli
+          
+          # Validate the OpenAPI specification
+          spectral lint App1.json --ruleset spectral:oas || echo "Validation completed with warnings"
+          
+      - name: Generate Swagger Documentation
+        run: |
+          # Create dist directory
+          mkdir -p dist
+          
+          # Copy necessary files
+          cp App1.json dist/
+          cp index.html dist/
+          
+          # Create a simple redirect page
+          cat > dist/swagger.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <meta http-equiv="refresh" content="0; url=./index.html">
+            <title>Redirecting to API Documentation...</title>
+          </head>
+          <body>
+            <p>If you are not redirected automatically, <a href="./index.html">click here</a>.</p>
+          </body>
+          </html>
+          EOF
+          
+          # Create README for the documentation
+          cat > dist/README.md << 'EOF'
+          # Police Officers Club API Documentation
+          
+          This repository contains the OpenAPI 3.0 specification and Swagger UI documentation for the Police Officers Club API.
+          
+          ## Quick Links
+          
+          - 📖 [View API Documentation](./index.html)
+          - 📄 [Download OpenAPI Spec](./App1.json)
+          - 🔗 [Swagger Editor](https://editor.swagger.io/?url=./App1.json)
+          
+          ## API Overview
+          
+          The Police Officers Club API provides endpoints for:
+          
+          - 🔐 **Authentication**: Phone-based OTP authentication
+          - 👥 **Member Management**: Registration and subscription management  
+          - 🏖️ **Chalet Booking**: Chalet reservations and availability
+          - 🏊 **Swimming Pool Reservations**: Pool booking system
+          - 💳 **Payment Processing**: KNET and payment handling
+          
+          ## API Base URL
+          
+          ```
+          https://api.policeclub.kw/v1
+          ```
+          
+          ## Authentication
+          
+          All API endpoints (except authentication) require a Bearer token:
+          
+          ```
+          Authorization: Bearer <your-jwt-token>
+          ```
+          
+          ## Support
+          
+          For API support, contact: [Police Officers Club](https://policeclub.kw)
+          EOF
+          
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  # Deployment job
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Police Officers Club API Documentation</title>
+  <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui.css" />
+  <link rel="icon" type="image/png" href="https://unpkg.com/swagger-ui-dist@5.17.14/favicon-32x32.png" sizes="32x32" />
+  <link rel="icon" type="image/png" href="https://unpkg.com/swagger-ui-dist@5.17.14/favicon-16x16.png" sizes="16x16" />
+  <style>
+    html {
+      box-sizing: border-box;
+      overflow: -moz-scrollbars-vertical;
+      overflow-y: scroll;
+    }
+    
+    *, *:before, *:after {
+      box-sizing: inherit;
+    }
+    
+    body {
+      margin: 0;
+      background: #fafafa;
+    }
+    
+    .swagger-ui .topbar {
+      background-color: #1b4332;
+    }
+    
+    .swagger-ui .topbar .download-url-wrapper .select-label {
+      color: #ffffff;
+    }
+    
+    .swagger-ui .info .title {
+      color: #1b4332;
+    }
+    
+    /* Custom styling for Police Club theme */
+    .swagger-ui .scheme-container {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      padding: 15px;
+    }
+    
+    .swagger-ui .btn.authorize {
+      background-color: #1b4332;
+      border-color: #1b4332;
+    }
+    
+    .swagger-ui .btn.authorize:hover {
+      background-color: #2d5a41;
+      border-color: #2d5a41;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="swagger-ui"></div>
+
+  <script src="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui-bundle.js" charset="UTF-8"></script>
+  <script src="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui-standalone-preset.js" charset="UTF-8"></script>
+  
+  <script>
+    window.onload = function() {
+      // Begin Swagger UI call region
+      const ui = SwaggerUIBundle({
+        url: './App1.json', // Your OpenAPI spec file
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        plugins: [
+          SwaggerUIBundle.plugins.DownloadUrl
+        ],
+        layout: "StandaloneLayout",
+        // Configuration options
+        tryItOutEnabled: true,
+        requestInterceptor: (request) => {
+          // Add any custom headers or modifications here
+          return request;
+        },
+        responseInterceptor: (response) => {
+          // Handle responses here if needed
+          return response;
+        },
+        // Display operation ID in the UI
+        displayOperationId: false,
+        // Display request duration
+        displayRequestDuration: true,
+        // Default expand/collapse behavior
+        docExpansion: "list", // "list", "full", "none"
+        // Show/hide the filter box
+        filter: true,
+        // Show/hide the header
+        showExtensions: true,
+        // Show/hide vendor extensions
+        showCommonExtensions: true,
+        // OAuth configuration (if needed in the future)
+        oauth2RedirectUrl: window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/oauth2-redirect.html'),
+        // Default model expansion depth
+        defaultModelExpandDepth: 3,
+        // Default models expansion depth
+        defaultModelsExpandDepth: 1,
+        // Syntax highlighting theme
+        syntaxHighlight: {
+          activated: true,
+          theme: "agate"
+        }
+      });
+      // End Swagger UI call region
+
+      // Custom JavaScript for additional functionality
+      window.ui = ui;
+      
+      // Add custom event listeners or modifications here
+      ui.getConfigs = () => {
+        return {
+          ...ui.getConfigs(),
+          // Add any custom configurations
+        }
+      };
+    };
+  </script>
+</body>
+</html>
