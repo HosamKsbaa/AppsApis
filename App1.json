@@ -1,0 +1,2167 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Police Officers Club API",
+    "description": "API for the Police Officers Club mobile application supporting authentication, chalet booking, and member management",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Police Officers Club",
+      "url": "https://policeclub.kw"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.policeclub.kw/v1",
+      "description": "Production server"
+    }
+    
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "User authentication and authorization endpoints"
+    },
+    {
+      "name": "Member Management",
+      "description": "Member profile and management operations"
+    },
+    {
+      "name": "Chalets",
+      "description": "Chalet management and availability"
+    },
+    {
+      "name": "Reservations",
+      "description": "Booking and reservation management"
+    },
+    {
+      "name": "Payments",
+      "description": "Payment processing and transaction management"
+    }
+  ],
+  "paths": {
+    "/auth/phone-login": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Login with Phone Number / Resend OTP",
+        "description": "Send OTP to phone number. If called again with the same phone number, it will resend the OTP code.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PhoneLoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OTP sent successfully (or resent if called again)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhoneLoginResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid phone number format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Phone number not registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded - too many OTP requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/verify-otp": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Verify OTP Code and Complete Authentication",
+        "description": "Verify the OTP code sent to user's phone number and return authentication tokens with membership status",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OtpVerificationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OTP verified successfully and authentication completed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthenticationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or expired OTP",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many attempts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/members/register": {
+      "post": {
+        "tags": ["Member Management"],
+        "summary": "Register New Member",
+        "description": "Register a new member if they are not already a member",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberRegistrationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Member registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberRegistrationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid registration data or user already a member",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/members/subscription": {
+      "get": {
+        "tags": ["Member Management"],
+        "summary": "Check Subscription Status",
+        "description": "Check if the authenticated member has an active subscription and return subscription details",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User is not a member",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/create": {
+      "post": {
+        "tags": ["Member Management"],
+        "summary": "Create Subscription",
+        "description": "Create a new subscription for a member with embedded invoice for payment",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSubscriptionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Subscription created successfully with invoice",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSubscriptionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid subscription data or user already has active subscription",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User is not a member",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/options": {
+      "get": {
+        "tags": ["Member Management"],
+        "summary": "Get Subscription Options",
+        "description": "Get list of available subscription options with pricing and details",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription options retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionOptionsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chalets": {
+      "get": {
+        "tags": ["Chalets"],
+        "summary": "Get List of Chalets",
+        "description": "Get paginated list of chalets with detailed information including amenities, pricing, and dynamic content",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "description": "Page number for pagination",
+            "example": 1
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10
+            },
+            "description": "Number of items per page",
+            "example": 10
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chalets retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChaletsListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chalets/{chaletId}/slots": {
+      "get": {
+        "tags": ["Chalets"],
+        "summary": "Get Available Time Slots for Chalet",
+        "description": "Get available time slots for a specific chalet with pricing information",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "chaletId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Chalet ID to get available slots for",
+            "example": "chalet_001"
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Start date to check availability from (YYYY-MM-DD)",
+            "example": "2025-07-15"
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "End date to check availability to (YYYY-MM-DD)",
+            "example": "2025-07-20"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Available slots retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChaletSlotsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Chalet not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chalets/book": {
+      "post": {
+        "tags": ["Chalets"],
+        "summary": "Book Chalet",
+        "description": "Create a chalet reservation using item ID and slot ID with embedded invoice for payment",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChaletBookingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Chalet booked successfully with invoice",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChaletBookingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid booking data or chalet not available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User is not a member with active subscription",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/swimming-pools": {
+      "get": {
+        "tags": ["Reservations"],
+        "summary": "Get List of Swimming Pools",
+        "description": "Get paginated list of swimming pools with detailed information including amenities, pricing, and dynamic content",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "description": "Page number for pagination",
+            "example": 1
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10
+            },
+            "description": "Number of items per page",
+            "example": 10
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Swimming pools retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SwimmingPoolsListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/swimming-pools/{poolId}/slots": {
+      "get": {
+        "tags": ["Reservations"],
+        "summary": "Get Available Time Slots for Swimming Pool",
+        "description": "Get available time slots for a specific swimming pool with pricing information",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "poolId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Swimming pool ID to get available slots for",
+            "example": "pool_001"
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Date to check availability for (YYYY-MM-DD)",
+            "example": "2025-07-15"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Available slots retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SwimmingPoolSlotsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Swimming pool not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/swimming-pools/book": {
+      "post": {
+        "tags": ["Reservations"],
+        "summary": "Book Swimming Pool",
+        "description": "Create a swimming pool reservation with embedded invoice for payment",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SwimmingPoolBookingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Swimming pool booked successfully with invoice",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SwimmingPoolBookingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid booking data or time slot not available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User is not a member with active subscription",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/payments/process": {
+      "post": {
+        "tags": ["Payments"],
+        "summary": "Process Payment",
+        "description": "Process payment for an invoice using KNET or other payment methods",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProcessPaymentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Payment processing initiated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcessPaymentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payment data or invoice not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/payments/status/{invoiceId}": {
+      "get": {
+        "tags": ["Payments"],
+        "summary": "Check Payment Status",
+        "description": "Check if payment was successful for a specific invoice ID",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "invoiceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Invoice ID to check payment status for",
+            "example": "inv_123456"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentStatusResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Invoice not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Logout User",
+        "description": "Logout user and invalidate tokens",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Logout successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogoutResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "PhoneLoginRequest": {
+        "type": "object",
+        "required": ["phoneNumber"],
+        "properties": {
+          "phoneNumber": {
+            "type": "string",
+            "pattern": "^(\\+965|965)?[569]\\d{7}$",
+            "description": "Kuwait phone number (8 digits or with country code)",
+            "example": "51234567"
+          }
+        }
+      },
+      "PhoneLoginResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "OTP sent successfully"
+          },
+          "expiryTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "OTP expiry time",
+            "example": "2025-06-30T12:05:00Z"
+          },
+          "resendAfter": {
+            "type": "integer",
+            "description": "Seconds to wait before resending OTP",
+            "example": 60
+          }
+        }
+      },
+      "OtpVerificationRequest": {
+        "type": "object",
+        "required": ["phoneNumber", "otpCode"],
+        "properties": {
+          "phoneNumber": {
+            "type": "string",
+            "pattern": "^(\\+965|965)?[569]\\d{7}$",
+            "description": "Kuwait phone number",
+            "example": "51234567"
+          },
+          "otpCode": {
+            "type": "string",
+            "pattern": "^\\d{6}$",
+            "description": "6-digit OTP code",
+            "example": "123456"
+          }
+        }
+      },
+      "AuthenticationResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "accessToken": {
+            "type": "string",
+            "description": "JWT access token",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "userId": {
+            "type": "string",
+            "description": "Unique user identifier",
+            "example": "user_123456"
+          },
+          "membership": {
+            "type": "object",
+            "properties": {
+              "isMember": {
+                "type": "boolean",
+                "description": "Whether the user is a registered member",
+                "example": true
+              }
+            }
+          }
+        }
+      },
+      "MemberRegistrationRequest": {
+        "type": "object",
+        "required": ["civilId", "name", "rank", "department"],
+        "properties": {
+          "civilId": {
+            "type": "string",
+            "pattern": "^\\d{12}$",
+            "description": "Kuwait Civil ID (12 digits)",
+            "example": "123456789012"
+          },
+          "name": {
+            "type": "string",
+            "description": "Full name in Arabic",
+            "example": "أحمد محمد الكندري"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email address",
+            "example": "ahmed.alkandari@example.com"
+          },
+          "rank": {
+            "type": "string",
+            "description": "Police rank",
+            "example": "نقيب"
+          },
+          "department": {
+            "type": "string",
+            "description": "Police department",
+            "example": "الأمن العام"
+          }
+        }
+      },
+      "MemberRegistrationResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "membershipNumber": {
+            "type": "string",
+            "description": "Generated membership number",
+            "example": "POL2025001"
+          },
+          "userId": {
+            "type": "string",
+            "description": "User identifier",
+            "example": "user_123456"
+          }
+        }
+      },
+      "SubscriptionResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "hasSubscription": {
+            "type": "boolean",
+            "description": "Whether the member has an active subscription",
+            "example": true
+          },
+          "subscription": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Subscription ID",
+                "example": "sub_123456"
+              },
+              "type": {
+                "type": "string",
+                "description": "Subscription type",
+                "example": "annual"
+              },
+              "startDate": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Subscription start date",
+                "example": "2025-01-01T00:00:00Z"
+              },
+              "expiryDate": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Subscription expiry date",
+                "example": "2025-12-31T23:59:59Z"
+              },
+              "status": {
+                "type": "string",
+                "enum": ["active", "expired", "suspended"],
+                "description": "Subscription status",
+                "example": "active"
+              }
+            },
+            "description": "Subscription details (null if no subscription)"
+          }
+        }
+      },
+      "CreateSubscriptionRequest": {
+        "type": "object",
+        "required": ["subscriptionType"],
+        "properties": {
+          "subscriptionType": {
+            "type": "string",
+            "enum": ["monthly", "quarterly", "annual"],
+            "description": "Type of subscription",
+            "example": "annual"
+          },
+          "userId": {
+            "type": "string",
+            "description": "User ID for the subscription (optional if using current authenticated user)",
+            "example": "user_123456"
+          }
+        }
+      },
+      "CreateSubscriptionResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "subscription": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Subscription ID",
+                "example": "sub_123456789"
+              },
+              "userId": {
+                "type": "string",
+                "description": "User ID",
+                "example": "user_123456"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["monthly", "quarterly", "annual"],
+                "description": "Subscription type",
+                "example": "annual"
+              },
+              "status": {
+                "type": "string",
+                "enum": ["pending_payment", "active", "expired", "suspended"],
+                "description": "Subscription status",
+                "example": "pending_payment"
+              },
+              "startDate": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Subscription start date (activated after payment)",
+                "example": "2025-07-01T00:00:00Z"
+              },
+              "expiryDate": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Subscription expiry date",
+                "example": "2026-06-30T23:59:59Z"
+              },
+              "invoice": {
+                "type": "object",
+                "properties": {
+                  "invoiceId": {
+                    "type": "string",
+                    "description": "Invoice ID for payment",
+                    "example": "inv_sub_123456789"
+                  },
+                  "amount": {
+                    "type": "number",
+                    "format": "decimal",
+                    "description": "Subscription amount in KWD",
+                    "example": 25.000
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Invoice description",
+                    "example": "اشتراك سنوي - Annual Subscription"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": ["pending", "paid", "expired", "cancelled"],
+                    "description": "Invoice payment status",
+                    "example": "pending"
+                  },
+                  "expiryDate": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Invoice expiry date",
+                    "example": "2025-07-07T12:00:00Z"
+                  }
+                },
+                "description": "Embedded invoice for subscription payment"
+              }
+            }
+          }
+        }
+      },
+      "SubscriptionOptionsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "subscriptionOptions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Subscription option ID",
+                  "example": "sub_option_annual"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Subscription name in Arabic",
+                  "example": "اشتراك سنوي"
+                },
+                "numberOfYears": {
+                  "type": "integer",
+                  "description": "Number of years for this subscription",
+                  "example": 1
+                },
+                "price": {
+                  "type": "number",
+                  "format": "decimal",
+                  "description": "Subscription price in KWD",
+                  "example": 25.000
+                },
+                "extraInformation": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "item": {
+                        "type": "string",
+                        "description": "Information item name",
+                        "example": "الخصومات"
+                      },
+                      "value": {
+                        "type": "string",
+                        "description": "Information value",
+                        "example": "خصم 10% على جميع الخدمات"
+                      }
+                    }
+                  },
+                  "description": "Additional information about this subscription option",
+                  "example": [
+                    {"item": "الخصومات", "value": "خصم 10% على جميع الخدمات"},
+                    {"item": "عدد الحجوزات", "value": "حجوزات مجانية شهرياً"},
+                    {"item": "المزايا الإضافية", "value": "دعوة مجانية للأحداث الخاصة"}
+                  ]
+                },
+                "isRecommended": {
+                  "type": "boolean",
+                  "description": "Whether this option is recommended",
+                  "example": true
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Detailed description of the subscription",
+                  "example": "الاشتراك الأكثر شيوعاً مع مزايا شاملة"
+                }
+              }
+            },
+            "description": "List of available subscription options"
+          }
+        }
+      },
+      "ChaletsListResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "currentPage": {
+                "type": "integer",
+                "description": "Current page number",
+                "example": 1
+              },
+              "totalPages": {
+                "type": "integer",
+                "description": "Total number of pages",
+                "example": 5
+              },
+              "totalItems": {
+                "type": "integer",
+                "description": "Total number of chalets",
+                "example": 42
+              },
+              "itemsPerPage": {
+                "type": "integer",
+                "description": "Number of items per page",
+                "example": 10
+              }
+            }
+          },
+          "chalets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Chalet ID",
+                  "example": "chalet_001"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Chalet name in Arabic",
+                  "example": "شاليه الياسمين"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Chalet description",
+                  "example": "شاليه فخم مع إطلالة رائعة على البحر"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Chalet type/category",
+                  "example": "فاخر"
+                },
+                "isAvailable": {
+                  "type": "boolean",
+                  "description": "Whether the chalet is available for booking",
+                  "example": true
+                },
+                "amenities": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "List of amenities",
+                  "example": ["مسبح خاص", "شواية", "مطبخ مجهز", "تكييف", "واي فاي"]
+                },
+                "priceOptions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "Price description",
+                        "example": "نهاية الأسبوع"
+                      },
+                      "price": {
+                        "type": "number",
+                        "format": "decimal",
+                        "description": "Price in KWD",
+                        "example": 75.000
+                      }
+                    }
+                  },
+                  "description": "Different pricing options",
+                  "example": [
+                    {"description": "أيام العمل", "price": 50.000},
+                    {"description": "نهاية الأسبوع", "price": 75.000},
+                    {"description": "صباحي", "price": 40.000}
+                  ]
+                },
+                "mainPicture": {
+                  "type": "string",
+                  "description": "Main chalet image URL",
+                  "example": "https://api.policeclub.kw/images/chalets/001_main.jpg"
+                },
+                "pictures": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Additional chalet images URLs",
+                  "example": [
+                    "https://api.policeclub.kw/images/chalets/001_1.jpg",
+                    "https://api.policeclub.kw/images/chalets/001_2.jpg",
+                    "https://api.policeclub.kw/images/chalets/001_3.jpg"
+                  ]
+                },
+                "extraDetails": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "item": {
+                        "type": "string",
+                        "description": "Detail name",
+                        "example": "عدد الغرف"
+                      },
+                      "value": {
+                        "type": "string",
+                        "description": "Detail value (can be number or text)",
+                        "example": "3"
+                      }
+                    }
+                  },
+                  "description": "Dynamic extra details about the chalet",
+                  "example": [
+                    {"item": "عدد الغرف", "value": "3"},
+                    {"item": "المساحة", "value": "200 متر مربع"},
+                    {"item": "عدد الأسرة", "value": "6"},
+                    {"item": "عدد دورات المياه", "value": "2"}
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "ChaletSlotsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "chaletId": {
+            "type": "string",
+            "description": "Chalet ID",
+            "example": "chalet_001"
+          },
+          "chaletName": {
+            "type": "string",
+            "description": "Chalet name",
+            "example": "شاليه الياسمين"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date for the available slots",
+            "example": "2025-07-15"
+          },
+          "availableSlots": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "slotId": {
+                  "type": "string",
+                  "description": "Unique slot identifier",
+                  "example": "slot_chalet_001_20250715"
+                },
+                "from": {
+                  "type": "string",
+                  "format": "time",
+                  "description": "Start time (HH:MM)",
+                  "example": "08:00"
+                },
+                "to": {
+                  "type": "string",
+                  "format": "time", 
+                  "description": "End time (HH:MM)",
+                  "example": "22:00"
+                },
+                "price": {
+                  "type": "number",
+                  "format": "decimal",
+                  "description": "Price for this slot in KWD",
+                  "example": 75.000
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Slot type/description",
+                  "example": "نهاية الأسبوع"
+                },
+                "isAvailable": {
+                  "type": "boolean",
+                  "description": "Whether this slot is available for booking",
+                  "example": true
+                }
+              }
+            },
+            "description": "List of available time slots with pricing"
+          }
+        }
+      },
+      "ChaletBookingRequest": {
+        "type": "object",
+        "required": ["chaletId", "slotId"],
+        "properties": {
+          "chaletId": {
+            "type": "string",
+            "description": "Chalet ID to book",
+            "example": "chalet_001"
+          },
+          "slotId": {
+            "type": "string",
+            "description": "Time slot ID chosen for booking",
+            "example": "slot_chalet_001_20250715"
+          },
+          "comments": {
+            "type": "string",
+            "description": "Additional comments or special requests",
+            "example": "نحتاج كراسي إضافية للأطفال"
+          },
+          "userId": {
+            "type": "string",
+            "description": "User ID for the booking (optional if using current authenticated user)",
+            "example": "user_123456"
+          }
+        }
+      },
+      "ChaletBookingResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "booking": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Booking ID",
+                "example": "booking_chalet_123456"
+              },
+              "userId": {
+                "type": "string",
+                "description": "User ID",
+                "example": "user_123456"
+              },
+              "chaletId": {
+                "type": "string",
+                "description": "Chalet ID",
+                "example": "chalet_001"
+              },
+              "chaletName": {
+                "type": "string",
+                "description": "Chalet name",
+                "example": "شاليه الياسمين"
+              },
+              "slotId": {
+                "type": "string",
+                "description": "Booked slot ID",
+                "example": "slot_chalet_001_20250715"
+              },
+              "bookingDate": {
+                "type": "string",
+                "format": "date",
+                "description": "Booking date",
+                "example": "2025-07-15"
+              },
+              "timeFrom": {
+                "type": "string",
+                "format": "time",
+                "description": "Start time",
+                "example": "08:00"
+              },
+              "timeTo": {
+                "type": "string",
+                "format": "time",
+                "description": "End time",
+                "example": "22:00"
+              },
+              "comments": {
+                "type": "string",
+                "description": "Additional comments",
+                "example": "نحتاج كراسي إضافية للأطفال"
+              },
+              "status": {
+                "type": "string",
+                "enum": ["pending_payment", "confirmed", "cancelled", "completed"],
+                "description": "Booking status",
+                "example": "pending_payment"
+              },
+              "invoice": {
+                "type": "object",
+                "properties": {
+                  "invoiceId": {
+                    "type": "string",
+                    "description": "Invoice ID for payment",
+                    "example": "inv_chalet_123456"
+                  },
+                  "amount": {
+                    "type": "number",
+                    "format": "decimal",
+                    "description": "Booking amount in KWD",
+                    "example": 75.000
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Invoice description",
+                    "example": "حجز شاليه الياسمين - 15 يوليو 2025"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": ["pending", "paid", "expired", "cancelled"],
+                    "description": "Invoice payment status",
+                    "example": "pending"
+                  },
+                  "expiryDate": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Invoice expiry date",
+                    "example": "2025-07-07T12:00:00Z"
+                  }
+                },
+                "description": "Embedded invoice for booking payment"
+              }
+            }
+          }
+        }
+      },
+      "SwimmingPoolsListResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "currentPage": {
+                "type": "integer",
+                "description": "Current page number",
+                "example": 1
+              },
+              "totalPages": {
+                "type": "integer",
+                "description": "Total number of pages",
+                "example": 3
+              },
+              "totalItems": {
+                "type": "integer",
+                "description": "Total number of swimming pools",
+                "example": 25
+              },
+              "itemsPerPage": {
+                "type": "integer",
+                "description": "Number of items per page",
+                "example": 10
+              }
+            }
+          },
+          "pools": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Swimming pool ID",
+                  "example": "pool_001"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Pool name in Arabic",
+                  "example": "المسبح الأولمبي"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Pool description",
+                  "example": "مسبح أولمبي بمواصفات عالمية للسباحة والتدريب"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Pool type/category",
+                  "example": "أولمبي"
+                },
+                "isAvailable": {
+                  "type": "boolean",
+                  "description": "Whether the pool is available for booking",
+                  "example": true
+                },
+                "amenities": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "List of amenities",
+                  "example": ["خزائن حفظ", "كراسي استلقاء", "دورات مياه", "كافيتيريا", "منقذ"]
+                },
+                "priceOptions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "Price description",
+                        "example": "مسائي"
+                      },
+                      "price": {
+                        "type": "number",
+                        "format": "decimal",
+                        "description": "Price per hour in KWD",
+                        "example": 8.000
+                      }
+                    }
+                  },
+                  "description": "Different pricing options per hour",
+                  "example": [
+                    {"description": "صباحي", "price": 5.000},
+                    {"description": "مسائي", "price": 8.000},
+                    {"description": "نهاية الأسبوع", "price": 10.000}
+                  ]
+                },
+                "mainPicture": {
+                  "type": "string",
+                  "description": "Main pool image URL",
+                  "example": "https://api.policeclub.kw/images/pools/001_main.jpg"
+                },
+                "pictures": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Additional pool images URLs",
+                  "example": [
+                    "https://api.policeclub.kw/images/pools/001_1.jpg",
+                    "https://api.policeclub.kw/images/pools/001_2.jpg"
+                  ]
+                },
+                "extraDetails": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "item": {
+                        "type": "string",
+                        "description": "Detail name",
+                        "example": "السعة"
+                      },
+                      "value": {
+                        "type": "string",
+                        "description": "Detail value (can be number or text)",
+                        "example": "30"
+                      }
+                    }
+                  },
+                  "description": "Dynamic extra details about the pool",
+                  "example": [
+                    {"item": "السعة", "value": "30"},
+                    {"item": "العمق", "value": "2 متر"},
+                    {"item": "الطول", "value": "50 متر"},
+                    {"item": "العرض", "value": "25 متر"}
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "SwimmingPoolSlotsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "poolId": {
+            "type": "string",
+            "description": "Swimming pool ID",
+            "example": "pool_001"
+          },
+          "poolName": {
+            "type": "string",
+            "description": "Pool name",
+            "example": "المسبح الأولمبي"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date for the available slots",
+            "example": "2025-07-15"
+          },
+          "availableSlots": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "slotId": {
+                  "type": "string",
+                  "description": "Unique slot identifier",
+                  "example": "slot_pool_001_20250715_0900"
+                },
+                "from": {
+                  "type": "string",
+                  "format": "time",
+                  "description": "Start time (HH:MM)",
+                  "example": "09:00"
+                },
+                "to": {
+                  "type": "string",
+                  "format": "time", 
+                  "description": "End time (HH:MM)",
+                  "example": "10:00"
+                },
+                "price": {
+                  "type": "number",
+                  "format": "decimal",
+                  "description": "Price for this slot in KWD",
+                  "example": 5.000
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Slot type/description",
+                  "example": "صباحي"
+                },
+                "isAvailable": {
+                  "type": "boolean",
+                  "description": "Whether this slot is available for booking",
+                  "example": true
+                }
+              }
+            },
+            "description": "List of available time slots with pricing"
+          }
+        }
+      },
+      "SwimmingPoolBookingRequest": {
+        "type": "object",
+        "required": ["poolId", "slotId", "numberOfPeople"],
+        "properties": {
+          "poolId": {
+            "type": "string",
+            "description": "Swimming pool ID to book",
+            "example": "pool_001"
+          },
+          "slotId": {
+            "type": "string",
+            "description": "Time slot ID chosen for booking",
+            "example": "slot_pool_001_20250715_0900"
+          },
+          "numberOfPeople": {
+            "type": "integer",
+            "description": "Number of people/swimmers",
+            "example": 8
+          },
+          "comments": {
+            "type": "string",
+            "description": "Additional comments or special requests",
+            "example": "نحتاج مدرب سباحة للأطفال"
+          },
+          "userId": {
+            "type": "string",
+            "description": "User ID for the booking (optional if using current authenticated user)",
+            "example": "user_123456"
+          }
+        }
+      },
+      "SwimmingPoolBookingResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "booking": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Booking ID",
+                "example": "booking_pool_123456"
+              },
+              "userId": {
+                "type": "string",
+                "description": "User ID",
+                "example": "user_123456"
+              },
+              "poolId": {
+                "type": "string",
+                "description": "Pool ID",
+                "example": "pool_001"
+              },
+              "poolName": {
+                "type": "string",
+                "description": "Pool name",
+                "example": "المسبح الأولمبي"
+              },
+              "slotId": {
+                "type": "string",
+                "description": "Booked slot ID",
+                "example": "slot_pool_001_20250715_0900"
+              },
+              "bookingDate": {
+                "type": "string",
+                "format": "date",
+                "description": "Booking date",
+                "example": "2025-07-15"
+              },
+              "startTime": {
+                "type": "string",
+                "format": "time",
+                "description": "Start time",
+                "example": "09:00"
+              },
+              "endTime": {
+                "type": "string",
+                "format": "time",
+                "description": "End time",
+                "example": "10:00"
+              },
+              "numberOfPeople": {
+                "type": "integer",
+                "description": "Number of people/swimmers",
+                "example": 8
+              },
+              "comments": {
+                "type": "string",
+                "description": "Additional comments",
+                "example": "نحتاج مدرب سباحة للأطفال"
+              },
+              "status": {
+                "type": "string",
+                "enum": ["pending_payment", "confirmed", "cancelled", "completed"],
+                "description": "Booking status",
+                "example": "pending_payment"
+              },
+              "invoice": {
+                "type": "object",
+                "properties": {
+                  "invoiceId": {
+                    "type": "string",
+                    "description": "Invoice ID for payment",
+                    "example": "inv_pool_123456"
+                  },
+                  "amount": {
+                    "type": "number",
+                    "format": "decimal",
+                    "description": "Booking amount in KWD",
+                    "example": 5.000
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Invoice description",
+                    "example": "حجز المسبح الأولمبي - 15 يوليو 2025 (09:00-10:00)"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": ["pending", "paid", "expired", "cancelled"],
+                    "description": "Invoice payment status",
+                    "example": "pending"
+                  },
+                  "expiryDate": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Invoice expiry date",
+                    "example": "2025-07-07T12:00:00Z"
+                  }
+                },
+                "description": "Embedded invoice for booking payment"
+              }
+            }
+          }
+        }
+      },
+      "ProcessPaymentRequest": {
+        "type": "object",
+        "required": ["invoiceId", "paymentMethod"],
+        "properties": {
+          "invoiceId": {
+            "type": "string",
+            "description": "Invoice ID to pay",
+            "example": "inv_123456789"
+          },
+          "paymentMethod": {
+            "type": "string",
+            "enum": ["knet", "credit_card", "apple_pay", "google_pay"],
+            "description": "Payment method",
+            "example": "knet"
+          },
+          "returnUrl": {
+            "type": "string",
+            "description": "URL to redirect after payment completion",
+            "example": "policeclub://payment-result"
+          }
+        }
+      },
+      "ProcessPaymentResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "paymentId": {
+            "type": "string",
+            "description": "Unique payment transaction ID",
+            "example": "pay_987654321"
+          },
+          "paymentUrl": {
+            "type": "string",
+            "description": "URL to redirect user for payment (KNET, etc.)",
+            "example": "https://knet.com.kw/payment?token=abc123"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["initiated", "pending", "processing"],
+            "description": "Payment processing status",
+            "example": "initiated"
+          }
+        }
+      },
+      "PaymentStatusResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "invoiceId": {
+            "type": "string",
+            "description": "Invoice ID",
+            "example": "inv_123456789"
+          },
+          "paymentId": {
+            "type": "string",
+            "description": "Payment transaction ID",
+            "example": "pay_987654321"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "paid", "failed", "cancelled", "expired"],
+            "description": "Payment status",
+            "example": "paid"
+          },
+          "amount": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Payment amount in KWD",
+            "example": 25.000
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Payment completion timestamp (null if not paid)",
+            "example": "2025-06-30T14:30:00Z"
+          },
+          "paymentMethod": {
+            "type": "string",
+            "description": "Payment method used",
+            "example": "knet"
+          },
+          "transactionReference": {
+            "type": "string",
+            "description": "Payment gateway transaction reference",
+            "example": "KNET_REF_123456"
+          }
+        }
+      },
+      "LogoutResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Logout successful"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique user identifier",
+            "example": "user_123456"
+          },
+          "civilId": {
+            "type": "string",
+            "description": "Kuwait Civil ID",
+            "example": "123456789012"
+          },
+          "name": {
+            "type": "string",
+            "description": "Full name in Arabic",
+            "example": "أحمد محمد الكندري"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email address",
+            "example": "ahmed.alkandari@example.com"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number",
+            "example": "51234567"
+          },
+          "membershipNumber": {
+            "type": "string",
+            "description": "Police club membership number",
+            "example": "POL2024001"
+          },
+          "rank": {
+            "type": "string",
+            "description": "Police rank",
+            "example": "نقيب"
+          },
+          "department": {
+            "type": "string",
+            "description": "Police department",
+            "example": "الأمن العام"
+          },
+          "membershipStatus": {
+            "type": "string",
+            "enum": ["not_member", "member", "member_without_subscription", "member_with_active_subscription"],
+            "example": "member_with_active_subscription"
+          },
+          "isSubscribed": {
+            "type": "boolean",
+            "description": "Active subscription status",
+            "example": true
+          },
+          "subscriptionExpiry": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Subscription expiry date",
+            "example": "2025-12-31T23:59:59Z"
+          },
+          "profilePicture": {
+            "type": "string",
+            "description": "Profile picture URL",
+            "example": "https://api.policeclub.kw/images/profiles/user_123456.jpg"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-01-15T10:30:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-06-30T12:00:00Z"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "Error code",
+                "example": "INVALID_PHONE_NUMBER"
+              },
+              "message": {
+                "type": "string",
+                "description": "Human-readable error message",
+                "example": "رقم الهاتف غير صحيح أو غير مسجل"
+              },
+              "details": {
+                "type": "object",
+                "description": "Additional error details",
+                "example": {
+                  "field": "phoneNumber",
+                  "reason": "Invalid format or not registered"
+                }
+              }
+            }
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-06-30T12:00:00Z"
+          },
+          "requestId": {
+            "type": "string",
+            "description": "Unique request identifier for debugging",
+            "example": "req_abc123def456"
+          }
+        }
+      }
+    }
+  }
+}
