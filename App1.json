@@ -3,7 +3,7 @@
   "info": {
     "title": "Police Officers Club API",
     "description": "API for the Police Officers Club mobile application supporting authentication, chalet booking, and member management",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "contact": {
       "name": "Police Officers Club",
       "url": "https://policeclub.kw"
