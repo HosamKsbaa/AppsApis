@@ -11,7 +11,7 @@
   },
   "servers": [
     {
-      "url": "https://api.policeclub.kw/v1",
+      "url": "https://api256413.policeclubkw.com/api",
       "description": "Production server"
     }
     
