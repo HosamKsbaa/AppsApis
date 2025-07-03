@@ -2,11 +2,16 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Police Officers Club API",
-    "description": "API for the Police Officers Club mobile application supporting authentication, chalet booking, and member management",
+    "description": "API for the Police Officers Club mobile application supporting authentication, member management, chalet booking, swimming pool reservations, and payment processing",
     "version": "1.0.1",
     "contact": {
       "name": "Police Officers Club",
-      "url": "https://policeclub.kw"
+      "url": "https://policeclub.kw",
+      "email": "api@policeclub.kw"
+    },
+    "license": {
+      "name": "Private",
+      "url": "https://policeclub.kw/license"
     }
   },
   "servers": [
