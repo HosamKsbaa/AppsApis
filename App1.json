@@ -2625,96 +2625,108 @@
       },
       "ChaletReservation": {
         "type": "object",
-        "description": "A chalet reservation containing complete chalet information and reservation details",
+        "description": "A chalet reservation containing complete chalet information and chalet-specific reservation details",
         "properties": {
           "chalet": {
             "$ref": "#/components/schemas/Chalet",
             "description": "Complete chalet information"
           },
           "reservationInfo": {
-            "$ref": "#/components/schemas/ReservationInfo",
-            "description": "Reservation details"
+            "$ref": "#/components/schemas/ChaletReservationInfo",
+            "description": "Chalet-specific reservation details"
           }
         },
         "required": ["chalet", "reservationInfo"]
       },
       "SwimmingPoolReservation": {
         "type": "object",
-        "description": "A swimming pool reservation containing complete swimming pool information and reservation details",
+        "description": "A swimming pool reservation containing complete swimming pool information and pool-specific reservation details",
         "properties": {
           "swimmingPool": {
             "$ref": "#/components/schemas/SwimmingPool",
             "description": "Complete swimming pool information"
           },
           "reservationInfo": {
-            "$ref": "#/components/schemas/ReservationInfo",
-            "description": "Reservation details"
+            "$ref": "#/components/schemas/SwimmingPoolReservationInfo",
+            "description": "Swimming pool-specific reservation details"
           }
         },
         "required": ["swimmingPool", "reservationInfo"]
       },
-      "ReservationInfo": {
+      "ChaletReservationInfo": {
         "type": "object",
-        "description": "Common reservation information for both chalets and swimming pools",
+        "description": "Reservation information specific to chalet bookings",
         "properties": {
           "id": {
             "type": "string",
             "description": "Unique reservation ID",
-            "example": "reservation_123456789"
+            "example": "chalet_reservation_123456789"
           },
           "status": {
             "type": "string",
-            "enum": ["draft", "reserved_not_paid", "paid_confirmed"],
-            "description": "Reservation status: draft, reserved but not paid, or paid and confirmed",
+            "enum": ["draft", "reserved_not_paid", "paid_confirmed", "cancelled", "completed"],
+            "description": "Chalet reservation status",
             "example": "paid_confirmed"
           },
           "bookingType": {
             "type": "string",
-            "enum": ["weekdays", "weekend", "morning", "evening", "full_day"],
-            "description": "Type of booking period",
+            "enum": ["weekdays", "weekend", "full_day", "overnight"],
+            "description": "Type of chalet booking period",
             "example": "weekend"
           },
           "startDate": {
             "type": "string",
             "format": "date",
-            "description": "Reservation start date",
+            "description": "Check-in date",
             "example": "2025-07-15"
           },
           "endDate": {
             "type": "string",
             "format": "date",
-            "description": "Reservation end date",
+            "description": "Check-out date",
             "example": "2025-07-16"
           },
-          "startTime": {
+          "checkInTime": {
             "type": "string",
             "format": "time",
-            "nullable": true,
-            "description": "Start time (mainly for swimming pools)",
-            "example": "08:00"
+            "description": "Check-in time",
+            "example": "15:00"
           },
-          "endTime": {
+          "checkOutTime": {
             "type": "string",
             "format": "time",
-            "nullable": true,
-            "description": "End time (mainly for swimming pools)",
-            "example": "14:00"
+            "description": "Check-out time",
+            "example": "12:00"
           },
-          "numberOfPeople": {
+          "numberOfGuests": {
             "type": "integer",
-            "nullable": true,
-            "description": "Number of people (mainly for swimming pools)",
-            "example": 4
+            "description": "Total number of guests",
+            "example": 8
+          },
+          "adultGuests": {
+            "type": "integer",
+            "description": "Number of adult guests",
+            "example": 5
+          },
+          "childGuests": {
+            "type": "integer",
+            "description": "Number of child guests",
+            "example": 3
+          },
+          "slotId": {
+            "type": "string",
+            "description": "Booked time slot ID",
+            "example": "slot_chalet_001_20250715"
           },
           "price": {
             "type": "object",
-            "description": "Pricing information",
+            "description": "Pricing information for chalet booking",
             "properties": {
               "amount": {
                 "type": "number",
                 "format": "decimal",
                 "description": "Total amount in KWD",
-                "example": 550.000
+                "example": 150.000
               },
               "currency": {
                 "type": "string",
@@ -2724,18 +2736,36 @@
               "formatted": {
                 "type": "string",
                 "description": "Formatted price string",
-                "example": "550 د.ك"
+                "example": "150 د.ك"
+              },
+              "breakdown": {
+                "type": "object",
+                "description": "Price breakdown",
+                "properties": {
+                  "basePrice": {
+                    "type": "number",
+                    "format": "decimal",
+                    "description": "Base chalet price",
+                    "example": 120.000
+                  },
+                  "additionalServices": {
+                    "type": "number",
+                    "format": "decimal",
+                    "description": "Additional services cost",
+                    "example": 30.000
+                  }
+                }
               }
             }
           },
           "invoice": {
             "type": "object",
-            "description": "Invoice information",
+            "description": "Invoice information for chalet booking",
             "properties": {
               "invoiceId": {
                 "type": "string",
                 "description": "Unique invoice ID",
-                "example": "inv_reservation_123456789"
+                "example": "inv_chalet_reservation_123456789"
               },
               "status": {
                 "type": "string",
@@ -2747,12 +2777,12 @@
                 "type": "number",
                 "format": "decimal",
                 "description": "Invoice amount in KWD",
-                "example": 550.000
+                "example": 150.000
               },
               "description": {
                 "type": "string",
                 "description": "Invoice description",
-                "example": "حجز THE GARDEN - 15-16 يوليو 2025"
+                "example": "حجز شاليه الياسمين - 15-16 يوليو 2025"
               },
               "issuedAt": {
                 "type": "string",
@@ -2776,6 +2806,35 @@
               }
             }
           },
+          "additionalServices": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "serviceName": {
+                  "type": "string",
+                  "description": "Service name",
+                  "example": "إضافة مأكولات"
+                },
+                "price": {
+                  "type": "number",
+                  "format": "decimal",
+                  "description": "Service price",
+                  "example": 30.000
+                }
+              }
+            },
+            "description": "Additional services booked with the chalet",
+            "example": [
+              {"serviceName": "إضافة مأكولات", "price": 30.000}
+            ]
+          },
+          "specialRequests": {
+            "type": "string",
+            "nullable": true,
+            "description": "Special requests for chalet setup",
+            "example": "ترتيب الطاولات للأطفال"
+          },
           "membershipNumber": {
             "type": "string",
             "description": "Member's membership number",
@@ -2793,24 +2852,259 @@
             "description": "Last modification timestamp",
             "example": "2025-06-15T11:15:00Z"
           },
-          "comments": {
-            "type": "string",
-            "nullable": true,
-            "description": "Special requests or comments",
-            "example": "نحتاج كراسي إضافية للأطفال"
-          },
           "canCancel": {
             "type": "boolean",
-            "description": "Whether the reservation can be cancelled",
+            "description": "Whether the chalet reservation can be cancelled",
             "example": true
           },
           "canModify": {
             "type": "boolean",
-            "description": "Whether the reservation can be modified",
+            "description": "Whether the chalet reservation can be modified",
             "example": false
+          },
+          "cancellationDeadline": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Deadline for free cancellation",
+            "example": "2025-07-13T23:59:59Z"
           }
         },
-        "required": ["id", "status", "startDate", "endDate", "price", "invoice", "membershipNumber", "createdAt", "updatedAt"]
+        "required": ["id", "status", "startDate", "endDate", "checkInTime", "checkOutTime", "numberOfGuests", "slotId", "price", "invoice", "membershipNumber", "createdAt", "updatedAt"]
+      },
+      "SwimmingPoolReservationInfo": {
+        "type": "object",
+        "description": "Reservation information specific to swimming pool bookings",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique reservation ID",
+            "example": "pool_reservation_123456789"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["draft", "reserved_not_paid", "paid_confirmed", "cancelled", "completed"],
+            "description": "Swimming pool reservation status",
+            "example": "paid_confirmed"
+          },
+          "bookingType": {
+            "type": "string",
+            "enum": ["morning", "afternoon", "evening", "hourly"],
+            "description": "Type of swimming pool booking period",
+            "example": "morning"
+          },
+          "bookingDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Swimming date",
+            "example": "2025-07-15"
+          },
+          "startTime": {
+            "type": "string",
+            "format": "time",
+            "description": "Swimming start time",
+            "example": "09:00"
+          },
+          "endTime": {
+            "type": "string",
+            "format": "time",
+            "description": "Swimming end time",
+            "example": "11:00"
+          },
+          "duration": {
+            "type": "integer",
+            "description": "Swimming duration in minutes",
+            "example": 120
+          },
+          "numberOfSwimmers": {
+            "type": "integer",
+            "description": "Number of swimmers",
+            "example": 4
+          },
+          "adultSwimmers": {
+            "type": "integer",
+            "description": "Number of adult swimmers",
+            "example": 2
+          },
+          "childSwimmers": {
+            "type": "integer",
+            "description": "Number of child swimmers",
+            "example": 2
+          },
+          "slotId": {
+            "type": "string",
+            "description": "Booked time slot ID",
+            "example": "slot_pool_001_20250715_0900"
+          },
+          "price": {
+            "type": "object",
+            "description": "Pricing information for pool booking",
+            "properties": {
+              "amount": {
+                "type": "number",
+                "format": "decimal",
+                "description": "Total amount in KWD",
+                "example": 25.000
+              },
+              "currency": {
+                "type": "string",
+                "description": "Currency code",
+                "example": "KWD"
+              },
+              "formatted": {
+                "type": "string",
+                "description": "Formatted price string",
+                "example": "25 د.ك"
+              },
+              "breakdown": {
+                "type": "object",
+                "description": "Price breakdown",
+                "properties": {
+                  "basePrice": {
+                    "type": "number",
+                    "format": "decimal",
+                    "description": "Base pool entry price",
+                    "example": 20.000
+                  },
+                  "equipmentRental": {
+                    "type": "number",
+                    "format": "decimal",
+                    "description": "Equipment rental cost",
+                    "example": 5.000
+                  }
+                }
+              }
+            }
+          },
+          "invoice": {
+            "type": "object",
+            "description": "Invoice information for pool booking",
+            "properties": {
+              "invoiceId": {
+                "type": "string",
+                "description": "Unique invoice ID",
+                "example": "inv_pool_reservation_123456789"
+              },
+              "status": {
+                "type": "string",
+                "enum": ["pending", "paid", "failed", "expired", "cancelled"],
+                "description": "Invoice payment status",
+                "example": "paid"
+              },
+              "amount": {
+                "type": "number",
+                "format": "decimal",
+                "description": "Invoice amount in KWD",
+                "example": 25.000
+              },
+              "description": {
+                "type": "string",
+                "description": "Invoice description",
+                "example": "حجز المسبح الأولمبي - 15 يوليو 2025 (09:00-11:00)"
+              },
+              "issuedAt": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Invoice creation timestamp",
+                "example": "2025-06-15T10:30:00Z"
+              },
+              "paidAt": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true,
+                "description": "Payment completion timestamp",
+                "example": "2025-06-15T11:15:00Z"
+              },
+              "expiryDate": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true,
+                "description": "Invoice expiry date (if not paid)",
+                "example": "2025-06-22T10:30:00Z"
+              }
+            }
+          },
+          "equipmentRental": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "equipmentName": {
+                  "type": "string",
+                  "description": "Equipment name",
+                  "example": "طوافات أطفال"
+                },
+                "quantity": {
+                  "type": "integer",
+                  "description": "Quantity rented",
+                  "example": 2
+                },
+                "price": {
+                  "type": "number",
+                  "format": "decimal",
+                  "description": "Rental price",
+                  "example": 5.000
+                }
+              }
+            },
+            "description": "Swimming equipment rented",
+            "example": [
+              {"equipmentName": "طوافات أطفال", "quantity": 2, "price": 5.000}
+            ]
+          },
+          "swimmingLevel": {
+            "type": "string",
+            "enum": ["beginner", "intermediate", "advanced", "mixed"],
+            "description": "Swimming level of the group",
+            "example": "mixed"
+          },
+          "needsLifeguard": {
+            "type": "boolean",
+            "description": "Whether a lifeguard is requested",
+            "example": true
+          },
+          "specialRequests": {
+            "type": "string",
+            "nullable": true,
+            "description": "Special requests for swimming session",
+            "example": "نحتاج مدرب سباحة للأطفال"
+          },
+          "membershipNumber": {
+            "type": "string",
+            "description": "Member's membership number",
+            "example": "MEMBER123456"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the reservation was created",
+            "example": "2025-06-15T10:30:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last modification timestamp",
+            "example": "2025-06-15T11:15:00Z"
+          },
+          "canCancel": {
+            "type": "boolean",
+            "description": "Whether the pool reservation can be cancelled",
+            "example": true
+          },
+          "canModify": {
+            "type": "boolean",
+            "description": "Whether the pool reservation can be modified",
+            "example": true
+          },
+          "cancellationDeadline": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Deadline for free cancellation",
+            "example": "2025-07-15T07:00:00Z"
+          }
+        },
+        "required": ["id", "status", "bookingDate", "startTime", "endTime", "duration", "numberOfSwimmers", "slotId", "price", "invoice", "membershipNumber", "createdAt", "updatedAt"]
       }
     }
   }
