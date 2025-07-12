@@ -1034,6 +1034,128 @@
           }
         }
       }
+    },
+    "/chalet-reservations": {
+      "get": {
+        "tags": ["Reservations"],
+        "summary": "Get all user chalet reservations",
+        "description": "Get all chalet reservations for the authenticated user. Returns complete chalet data with reservation details for local searching and filtering on mobile device.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "description": "Page number for pagination",
+            "example": 1
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            },
+            "description": "Number of reservations per page",
+            "example": 50
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All user chalet reservations retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChaletReservationsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/swimming-pool-reservations": {
+      "get": {
+        "tags": ["Reservations"],
+        "summary": "Get all user swimming pool reservations",
+        "description": "Get all swimming pool reservations for the authenticated user. Returns complete swimming pool data with reservation details for local searching and filtering on mobile device.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "description": "Page number for pagination",
+            "example": 1
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            },
+            "description": "Number of reservations per page",
+            "example": 50
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All user swimming pool reservations retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SwimmingPoolReservationsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2417,6 +2539,278 @@
             "example": "notif_123456789"
           }
         }
+      },
+
+      "ChaletReservationsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "currentPage": {
+                "type": "integer",
+                "description": "Current page number",
+                "example": 1
+              },
+              "totalPages": {
+                "type": "integer",
+                "description": "Total number of pages",
+                "example": 2
+              },
+              "totalItems": {
+                "type": "integer",
+                "description": "Total number of chalet reservations",
+                "example": 45
+              },
+              "pageSize": {
+                "type": "integer",
+                "description": "Number of items per page",
+                "example": 50
+              }
+            }
+          },
+          "reservations": {
+            "type": "array",
+            "description": "List of all user chalet reservations",
+            "items": {
+              "$ref": "#/components/schemas/ChaletReservation"
+            }
+          }
+        }
+      },
+      "SwimmingPoolReservationsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "currentPage": {
+                "type": "integer",
+                "description": "Current page number",
+                "example": 1
+              },
+              "totalPages": {
+                "type": "integer",
+                "description": "Total number of pages",
+                "example": 1
+              },
+              "totalItems": {
+                "type": "integer",
+                "description": "Total number of swimming pool reservations",
+                "example": 30
+              },
+              "pageSize": {
+                "type": "integer",
+                "description": "Number of items per page",
+                "example": 50
+              }
+            }
+          },
+          "reservations": {
+            "type": "array",
+            "description": "List of all user swimming pool reservations",
+            "items": {
+              "$ref": "#/components/schemas/SwimmingPoolReservation"
+            }
+          }
+        }
+      },
+      "ChaletReservation": {
+        "type": "object",
+        "description": "A chalet reservation containing complete chalet information and reservation details",
+        "properties": {
+          "chalet": {
+            "$ref": "#/components/schemas/Chalet",
+            "description": "Complete chalet information"
+          },
+          "reservationInfo": {
+            "$ref": "#/components/schemas/ReservationInfo",
+            "description": "Reservation details"
+          }
+        },
+        "required": ["chalet", "reservationInfo"]
+      },
+      "SwimmingPoolReservation": {
+        "type": "object",
+        "description": "A swimming pool reservation containing complete swimming pool information and reservation details",
+        "properties": {
+          "swimmingPool": {
+            "$ref": "#/components/schemas/SwimmingPool",
+            "description": "Complete swimming pool information"
+          },
+          "reservationInfo": {
+            "$ref": "#/components/schemas/ReservationInfo",
+            "description": "Reservation details"
+          }
+        },
+        "required": ["swimmingPool", "reservationInfo"]
+      },
+      "ReservationInfo": {
+        "type": "object",
+        "description": "Common reservation information for both chalets and swimming pools",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique reservation ID",
+            "example": "reservation_123456789"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["draft", "reserved_not_paid", "paid_confirmed"],
+            "description": "Reservation status: draft, reserved but not paid, or paid and confirmed",
+            "example": "paid_confirmed"
+          },
+          "bookingType": {
+            "type": "string",
+            "enum": ["weekdays", "weekend", "morning", "evening", "full_day"],
+            "description": "Type of booking period",
+            "example": "weekend"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Reservation start date",
+            "example": "2025-07-15"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Reservation end date",
+            "example": "2025-07-16"
+          },
+          "startTime": {
+            "type": "string",
+            "format": "time",
+            "nullable": true,
+            "description": "Start time (mainly for swimming pools)",
+            "example": "08:00"
+          },
+          "endTime": {
+            "type": "string",
+            "format": "time",
+            "nullable": true,
+            "description": "End time (mainly for swimming pools)",
+            "example": "14:00"
+          },
+          "numberOfPeople": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Number of people (mainly for swimming pools)",
+            "example": 4
+          },
+          "price": {
+            "type": "object",
+            "description": "Pricing information",
+            "properties": {
+              "amount": {
+                "type": "number",
+                "format": "decimal",
+                "description": "Total amount in KWD",
+                "example": 550.000
+              },
+              "currency": {
+                "type": "string",
+                "description": "Currency code",
+                "example": "KWD"
+              },
+              "formatted": {
+                "type": "string",
+                "description": "Formatted price string",
+                "example": "550 د.ك"
+              }
+            }
+          },
+          "invoice": {
+            "type": "object",
+            "description": "Invoice information",
+            "properties": {
+              "invoiceId": {
+                "type": "string",
+                "description": "Unique invoice ID",
+                "example": "inv_reservation_123456789"
+              },
+              "status": {
+                "type": "string",
+                "enum": ["pending", "paid", "failed", "expired", "cancelled"],
+                "description": "Invoice payment status",
+                "example": "paid"
+              },
+              "amount": {
+                "type": "number",
+                "format": "decimal",
+                "description": "Invoice amount in KWD",
+                "example": 550.000
+              },
+              "description": {
+                "type": "string",
+                "description": "Invoice description",
+                "example": "حجز THE GARDEN - 15-16 يوليو 2025"
+              },
+              "issuedAt": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Invoice creation timestamp",
+                "example": "2025-06-15T10:30:00Z"
+              },
+              "paidAt": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true,
+                "description": "Payment completion timestamp",
+                "example": "2025-06-15T11:15:00Z"
+              },
+              "expiryDate": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true,
+                "description": "Invoice expiry date (if not paid)",
+                "example": "2025-06-22T10:30:00Z"
+              }
+            }
+          },
+          "membershipNumber": {
+            "type": "string",
+            "description": "Member's membership number",
+            "example": "MEMBER123456"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the reservation was created",
+            "example": "2025-06-15T10:30:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last modification timestamp",
+            "example": "2025-06-15T11:15:00Z"
+          },
+          "comments": {
+            "type": "string",
+            "nullable": true,
+            "description": "Special requests or comments",
+            "example": "نحتاج كراسي إضافية للأطفال"
+          },
+          "canCancel": {
+            "type": "boolean",
+            "description": "Whether the reservation can be cancelled",
+            "example": true
+          },
+          "canModify": {
+            "type": "boolean",
+            "description": "Whether the reservation can be modified",
+            "example": false
+          }
+        },
+        "required": ["id", "status", "startDate", "endDate", "price", "invoice", "membershipNumber", "createdAt", "updatedAt"]
       }
     }
   }
