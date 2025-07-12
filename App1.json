@@ -46,6 +46,10 @@
     {
       "name": "Payments",
       "description": "Payment processing and transaction management"
+    },
+    {
+      "name": "Notifications",
+      "description": "User notification management and delivery"
     }
   ],
   "paths": {
@@ -875,6 +879,145 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/LogoutResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notifications": {
+      "get": {
+        "tags": ["Notifications"],
+        "summary": "Get User Notifications",
+        "description": "Get paginated list of notifications for the authenticated user with filtering options",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "description": "Page number for pagination",
+            "example": 1
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            },
+            "description": "Number of notifications per page",
+            "example": 20
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["general", "reservation", "payment", "event", "maintenance", "security", "promotion"]
+            },
+            "description": "Filter notifications by type",
+            "example": "reservation"
+          },
+          {
+            "name": "unreadOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Show only unread notifications",
+            "example": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notifications retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationsListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notifications/{notificationId}/read": {
+      "patch": {
+        "tags": ["Notifications"],
+        "summary": "Mark Notification as Read",
+        "description": "Mark a specific notification as read for the authenticated user",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "notificationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Notification ID to mark as read",
+            "example": "notif_123456"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notification marked as read successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationReadResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Notification not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -2164,6 +2307,114 @@
             "type": "string",
             "description": "Unique request identifier for debugging",
             "example": "req_abc123def456"
+          }
+        }
+      },
+      "NotificationsListResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "currentPage": {
+                "type": "integer",
+                "description": "Current page number",
+                "example": 1
+              },
+              "totalPages": {
+                "type": "integer",
+                "description": "Total number of pages",
+                "example": 5
+              },
+              "totalItems": {
+                "type": "integer",
+                "description": "Total number of notifications",
+                "example": 85
+              },
+              "itemsPerPage": {
+                "type": "integer",
+                "description": "Number of items per page",
+                "example": 20
+              }
+            }
+          },
+          "notifications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Notification"
+            },
+            "description": "List of user notifications"
+          }
+        }
+      },
+      "Notification": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique notification identifier",
+            "example": "notif_123456789"
+          },
+          "title": {
+            "type": "string",
+            "description": "Notification title in Arabic",
+            "example": "تأكيد حجز الشاليه"
+          },
+          "message": {
+            "type": "string",
+            "description": "Notification message content",
+            "example": "تم تأكيد حجزك للشاليه رقم 15 بتاريخ 20/12/2025. يمكنك مراجعة تفاصيل الحجز في قسم 'حجوزاتي'."
+          },
+          "type": {
+            "type": "string",
+            "enum": ["general", "reservation", "payment", "event", "maintenance", "security", "promotion"],
+            "description": "Type of notification",
+            "example": "reservation"
+          },
+          "isRead": {
+            "type": "boolean",
+            "description": "Whether the notification has been read by the user",
+            "example": false
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Notification creation timestamp",
+            "example": "2025-07-12T10:30:00Z"
+          },
+          "actionData": {
+            "type": "string",
+            "nullable": true,
+            "description": "Optional action data for navigation (e.g., reservation_15, payment_250)",
+            "example": "reservation_15"
+          },
+          "imageUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "Optional notification image URL",
+            "example": "https://api.policeclub.kw/images/notifications/notif_123.jpg"
+          }
+        }
+      },
+      "NotificationReadResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "تم تحديد الإشعار كمقروء"
+          },
+          "notificationId": {
+            "type": "string",
+            "description": "ID of the notification that was marked as read",
+            "example": "notif_123456789"
           }
         }
       }
