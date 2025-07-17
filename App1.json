@@ -50,6 +50,10 @@
     {
       "name": "Notifications",
       "description": "User notification management and delivery"
+    },
+    {
+      "name": "News",
+      "description": "News and announcements management"
     }
   ],
   "paths": {
@@ -1172,6 +1176,124 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ChaletReservationsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/news": {
+      "get": {
+        "tags": ["News"],
+        "summary": "Get List of News Items",
+        "description": "Get paginated list of news items with basic information for listing view",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "description": "Page number for pagination",
+            "example": 1
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10
+            },
+            "description": "Number of items per page",
+            "example": 10
+          }
+          
+        ],
+        "responses": {
+          "200": {
+            "description": "News items retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewsListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/news/{newsId}": {
+      "get": {
+        "tags": ["News"],
+        "summary": "Get News Item Details",
+        "description": "Get detailed information about a specific news item including HTML content",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "newsId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "News item ID",
+            "example": "news_123456"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "News item details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewsDetailsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "News item not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -2750,8 +2872,7 @@
               "amount": {
                 "type": "number",
                 "example": 75.000
-              },
-  
+              }
             }
           },
           "membershipNumber": {
@@ -2836,6 +2957,122 @@
           }
         },
         "required": ["id", "status", "bookingDate", "startTime", "endTime", "duration", "slotId", "price", "invoice", "membershipNumber", "createdAt"]
+      },
+      "NewsListResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "integer",
+                "example": 1
+              },
+              "limit": {
+                "type": "integer",
+                "example": 10
+              },
+              "total": {
+                "type": "integer",
+                "example": 25
+              },
+              "totalPages": {
+                "type": "integer",
+                "example": 3
+              }
+            }
+          },
+          "news": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NewsItem"
+            }
+          }
+        }
+      },
+      "NewsItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "news_123456"
+          },
+          "title": {
+            "type": "string",
+            "example": "إعلان عن فعالية رياضية جديدة"
+          },
+          "summary": {
+            "type": "string",
+            "example": "ينظم النادي فعالية رياضية مميزة لجميع الأعضاء والمشتركين"
+          },
+
+          "thumbnailImage": {
+            "type": "string",
+            "description": "URL of the news thumbnail image",
+            "example": "https://api256413.policeclubkw.com/uploads/news/thumb_123456.jpg"
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-07-15T10:30:00Z"
+          }
+
+ 
+        }
+      },
+      "NewsDetailsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "news": {
+            "$ref": "#/components/schemas/NewsDetails"
+          }
+        }
+      },
+      "NewsDetails": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "news_123456"
+          },
+          "title": {
+            "type": "string",
+            "example": "إعلان عن فعالية رياضية جديدة"
+          },
+          "summary": {
+            "type": "string",
+            "example": "ينظم النادي فعالية رياضية مميزة لجميع الأعضاء والمشتركين"
+          },
+
+          "thumbnailImage": {
+            "type": "string",
+            "description": "URL of the news thumbnail image",
+            "example": "https://api256413.policeclubkw.com/uploads/news/thumb_123456.jpg"
+          },
+
+          "htmlContent": {
+            "type": "string",
+            "description": "Full HTML content of the news article",
+            "example": "<div class=\"news-content\"><h2>تفاصيل الفعالية</h2><p>تهدف هذه الفعالية إلى تعزيز الروح الرياضية...</p><img src=\"https://api256413.policeclubkw.com/uploads/news/content_123456.jpg\" alt=\"صورة الفعالية\" /><p>للمشاركة يرجى التسجيل عبر التطبيق.</p></div>"
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-07-15T10:30:00Z"
+          }
+
+      
+
+
+        }
       }
     }
   }
