@@ -2862,10 +2862,7 @@
             "type": "string",
             "example": "slot_chalet_001_20250715"
           },
-          "price": {
-            "type": "number",
-            "example": 75.000
-          },
+
           "invoice": {
             "type": "object",
             "properties": {
@@ -2879,10 +2876,7 @@
               }
             }
           },
-          "membershipNumber": {
-            "type": "string",
-            "example": "POL2025001"
-          },
+   
           "createdAt": {
             "type": "string",
             "format": "date-time",
