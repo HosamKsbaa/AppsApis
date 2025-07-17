@@ -895,6 +895,99 @@
           }
         }
       }
+    }
+    ,
+    "/auth/check-phone": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Check User State by Phone Number",
+        "description": "Checks if the user is a member and/or subscriber by phone number. Used on app open.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "phoneNumber": {
+                    "type": "string",
+                    "description": "User's phone number"
+                  }
+                },
+                "required": ["phoneNumber"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User state returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserStateResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/check-id": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Check User State by National ID",
+        "description": "Checks if the user is a member and/or subscriber by national ID. Used on app open.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nationalId": {
+                    "type": "string",
+                    "description": "User's national ID"
+                  }
+                },
+                "required": ["nationalId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User state returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserStateResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "/notifications": {
       "get": {
@@ -929,7 +1022,7 @@
               "maximum": 50,
               "default": 20
             },
-            "description": "Number of notifications per page",
+            "description": "Number of items per page",
             "example": 20
           },
           {
@@ -938,7 +1031,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "enum": ["general", "reservation", "payment", "event", "maintenance", "security", "promotion"]
+              "enum": ["reservation", "payment", "membership", "general"]
             },
             "description": "Filter notifications by type",
             "example": "reservation"
@@ -998,7 +1091,7 @@
               "type": "string"
             },
             "description": "Notification ID to mark as read",
-            "example": "notif_123456"
+            "example": "notification_123456"
           }
         ],
         "responses": {
@@ -1059,22 +1152,22 @@
             "example": 1
           },
           {
-            "name": "size",
+            "name": "limit",
             "in": "query",
             "required": false,
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 100,
-              "default": 50
+              "maximum": 50,
+              "default": 10
             },
-            "description": "Number of reservations per page",
-            "example": 50
+            "description": "Number of items per page",
+            "example": 10
           }
         ],
         "responses": {
           "200": {
-            "description": "All user chalet reservations retrieved successfully",
+            "description": "Chalet reservations retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -1084,7 +1177,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized - Invalid or missing authentication",
+            "description": "Unauthorized",
             "content": {
               "application/json": {
                 "schema": {
@@ -1106,6 +1199,32 @@
       }
     },
     "schemas": {
+      "UserStateResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "message": { "type": "string", "example": "ok" },
+          "expiryTime": { "type": "string", "format": "date-time", "example": "2025-06-30T12:05:00Z" },
+          "membership": {
+            "type": "object",
+            "properties": {
+              "isMember": { "type": "boolean", "example": true },
+              "isSubscriber": { "type": "boolean", "example": true }
+            }
+          },
+          "resendAfter": { "type": "integer", "example": 60 }
+        },
+        "example": {
+          "success": true,
+          "message": "ok",
+          "expiryTime": "2025-06-30T12:05:00Z",
+          "membership": {
+            "isMember": true,
+            "isSubscriber": true
+          },
+          "resendAfter": 60
+        }
+      },
       "PhoneLoginRequest": {
         "type": "object",
         "required": ["phoneNumber"],
@@ -1258,7 +1377,7 @@
             "nullable": true,
             "properties": {
               "id": {
-                "type": "string",
+                "type": "integer",
                 "description": "Subscription ID",
                 "example": "sub_123456"
               },
@@ -1318,7 +1437,7 @@
             "type": "object",
             "properties": {
               "id": {
-                "type": "string",
+                "type": "integer",
                 "description": "Subscription ID",
                 "example": "sub_123456789"
               },
@@ -1404,7 +1523,7 @@
                 "id": {
                   "type": "string",
                   "description": "Subscription option ID",
-                  "example": "sub_option_annual"
+                  "example": 1
                 },
                 "name": {
                   "type": "string",
@@ -1417,10 +1536,9 @@
                   "example": 1
                 },
                 "price": {
-                  "type": "number",
-                  "format": "decimal",
+                  "type": "integer",
                   "description": "Subscription price in KWD",
-                  "example": 25.000
+                  "example": 25
                 },
                 "extraInformation": {
                   "type": "array",
@@ -1480,12 +1598,12 @@
               "totalPages": {
                 "type": "integer",
                 "description": "Total number of pages",
-                "example": 5
+                "example": 2
               },
               "totalItems": {
                 "type": "integer",
                 "description": "Total number of chalets",
-                "example": 42
+                "example": 11
               },
               "itemsPerPage": {
                 "type": "integer",
@@ -1502,27 +1620,33 @@
                 "id": {
                   "type": "string",
                   "description": "Chalet ID",
-                  "example": "chalet_001"
+                  "example": "1"
                 },
                 "name": {
                   "type": "string",
-                  "description": "Chalet name in Arabic",
-                  "example": "شاليه الياسمين"
+                  "description": "Chalet name",
+                  "example": "A1"
                 },
                 "description": {
                   "type": "string",
+                  "nullable": true,
                   "description": "Chalet description",
-                  "example": "شاليه فخم مع إطلالة رائعة على البحر"
+                  "example": null
                 },
                 "type": {
                   "type": "string",
                   "description": "Chalet type/category",
-                  "example": "فاخر"
+                  "example": "شاليهات علي البحر"
                 },
                 "isAvailable": {
                   "type": "boolean",
                   "description": "Whether the chalet is available for booking",
                   "example": true
+                },
+                "status": {
+                  "type": "string",
+                  "description": "Current status of the chalet",
+                  "example": "متاحة"
                 },
                 "amenities": {
                   "type": "array",
@@ -1530,37 +1654,12 @@
                     "type": "string"
                   },
                   "description": "List of amenities",
-                  "example": ["مسبح خاص", "شواية", "مطبخ مجهز", "تكييف", "واي فاي"]
-                },
-                "priceOptions": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "description": {
-                        "type": "string",
-                        "description": "Price description",
-                        "example": "نهاية الأسبوع"
-                      },
-                      "price": {
-                        "type": "number",
-                        "format": "decimal",
-                        "description": "Price in KWD",
-                        "example": 75.000
-                      }
-                    }
-                  },
-                  "description": "Different pricing options",
-                  "example": [
-                    {"description": "أيام العمل", "price": 50.000},
-                    {"description": "نهاية الأسبوع", "price": 75.000},
-                    {"description": "صباحي", "price": 40.000}
-                  ]
+                  "example": ["مسبح خاص", "شواية", "مطبخ مجهز", "واي فاي", "تكييف"]
                 },
                 "mainPicture": {
                   "type": "string",
-                  "description": "Main chalet image URL",
-                  "example": "https://api.policeclub.kw/images/chalets/001_main.jpg"
+                  "description": "Main chalet image filename",
+                  "example": "1750004902.png"
                 },
                 "pictures": {
                   "type": "array",
@@ -1569,10 +1668,59 @@
                   },
                   "description": "Additional chalet images URLs",
                   "example": [
-                    "https://api.policeclub.kw/images/chalets/001_1.jpg",
-                    "https://api.policeclub.kw/images/chalets/001_2.jpg",
-                    "https://api.policeclub.kw/images/chalets/001_3.jpg"
+                    "https://api256413.policeclubkw.com/uploads/units/1750692532_Screenshot from 2025-06-17 17-37-01.png",
+                    "https://api256413.policeclubkw.com/uploads/units/1751899725_Screenshot from 2025-06-29 19-43-30.png"
                   ]
+                },
+                "priceOptions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "slotId": {
+                        "type": "string",
+                        "description": "Unique slot identifier",
+                        "example": "6"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "Slot description",
+                        "example": "أيام العمل"
+                      },
+                      "available_from": {
+                        "type": "string",
+                        "description": "Slot available from date/time",
+                        "example": "2025-07-15 23:00:00"
+                      },
+                      "available_to": {
+                        "type": "string",
+                        "description": "Slot available to date/time",
+                        "example": "2025-07-22 23:00:00"
+                      },
+                      "booked_quantities": {
+                        "type": "integer",
+                        "description": "Number of booked quantities",
+                        "example": 1
+                      },
+                      "quantity": {
+                        "type": "integer",
+                        "description": "Total quantity",
+                        "example": 1
+                      },
+                      "is_available": {
+                        "type": "boolean",
+                        "description": "Whether this slot is available for booking",
+                        "example": false
+                      },
+                      "price": {
+                        "type": "string",
+                        "format": "decimal",
+                        "description": "Price for this slot in KWD",
+                        "example": "50.00"
+                      }
+                    }
+                  },
+                  "description": "Different pricing options with availability"
                 },
                 "extraDetails": {
                   "type": "array",
@@ -1586,16 +1734,17 @@
                       },
                       "value": {
                         "type": "string",
-                        "description": "Detail value (can be number or text)",
-                        "example": "3"
+                        "nullable": true,
+                        "description": "Detail value (can be number, text, or null)",
+                        "example": "5"
                       }
                     }
                   },
                   "description": "Dynamic extra details about the chalet",
                   "example": [
-                    {"item": "عدد الغرف", "value": "3"},
-                    {"item": "المساحة", "value": "200 متر مربع"},
-                    {"item": "عدد الأسرة", "value": "6"},
+                    {"item": "عدد الغرف", "value": "5"},
+                    {"item": "المساحة", "value": "200"},
+                    {"item": "عدد الأسرة", "value": "10"},
                     {"item": "عدد دورات المياه", "value": "2"}
                   ]
                 }
@@ -1635,7 +1784,7 @@
                 "slotId": {
                   "type": "string",
                   "description": "Unique slot identifier",
-                  "example": "slot_chalet_001_20250715"
+                  "example": "6"
                 },
                 "from": {
                   "type": "string",
@@ -1650,16 +1799,17 @@
                   "example": "22:00"
                 },
                 "price": {
-                  "type": "number",
+                  "type": "string",
                   "format": "decimal",
                   "description": "Price for this slot in KWD",
-                  "example": 75.000
+                  "example": "75.000"
                 },
                 "type": {
                   "type": "string",
                   "description": "Slot type/description",
                   "example": "نهاية الأسبوع"
                 },
+
                 "isAvailable": {
                   "type": "boolean",
                   "description": "Whether this slot is available for booking",
@@ -1683,7 +1833,7 @@
           "slotId": {
             "type": "string",
             "description": "Time slot ID chosen for booking",
-            "example": "slot_chalet_001_20250715"
+            "example": "6"
           },
           "comments": {
             "type": "string",
@@ -1730,7 +1880,7 @@
               "slotId": {
                 "type": "string",
                 "description": "Booked slot ID",
-                "example": "slot_chalet_001_20250715"
+                "example": "6"
               },
               "bookingDate": {
                 "type": "string",
@@ -1880,18 +2030,18 @@
                         "example": "مسائي"
                       },
                       "price": {
-                        "type": "number",
+                        "type": "string",
                         "format": "decimal",
-                        "description": "Price per hour in KWD",
-                        "example": 8.000
+                        "description": "Price per hour in KWD as string",
+                        "example": "8.000"
                       }
                     }
                   },
                   "description": "Different pricing options per hour",
                   "example": [
-                    {"description": "صباحي", "price": 5.000},
-                    {"description": "مسائي", "price": 8.000},
-                    {"description": "نهاية الأسبوع", "price": 10.000}
+                    {"description": "صباحي", "price": "5.000"},
+                    {"description": "مسائي", "price": "8.000"},
+                    {"description": "نهاية الأسبوع", "price": "10.000"}
                   ]
                 },
                 "mainPicture": {
@@ -1971,8 +2121,9 @@
                 "slotId": {
                   "type": "string",
                   "description": "Unique slot identifier",
-                  "example": "slot_pool_001_20250715_0900"
+                  "example": "1"
                 },
+
                 "from": {
                   "type": "string",
                   "format": "time",
@@ -1986,16 +2137,17 @@
                   "example": "10:00"
                 },
                 "price": {
-                  "type": "number",
+                  "type": "string",
                   "format": "decimal",
                   "description": "Price for this slot in KWD",
-                  "example": 5.000
+                  "example": "5.000"
                 },
                 "type": {
                   "type": "string",
                   "description": "Slot type/description",
                   "example": "صباحي"
                 },
+
                 "isAvailable": {
                   "type": "boolean",
                   "description": "Whether this slot is available for booking",
@@ -2017,9 +2169,9 @@
             "example": "pool_001"
           },
           "slotId": {
-            "type": "string",
+            "type": "integer",
             "description": "Time slot ID chosen for booking",
-            "example": "slot_pool_001_20250715_0900"
+            "example": 1
           },
           "numberOfPeople": {
             "type": "integer",
@@ -2049,7 +2201,7 @@
             "type": "object",
             "properties": {
               "id": {
-                "type": "string",
+                "type": "integer",
                 "description": "Booking ID",
                 "example": "booking_pool_123456"
               },
@@ -2069,9 +2221,9 @@
                 "example": "المسبح الأولمبي"
               },
               "slotId": {
-                "type": "string",
+                "type": "integer",
                 "description": "Booked slot ID",
-                "example": "slot_pool_001_20250715_0900"
+                "example": 1
               },
               "bookingDate": {
                 "type": "string",
@@ -2256,7 +2408,7 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string",
+            "type": "integer",
             "description": "Unique user identifier",
             "example": "user_123456"
           },
@@ -2381,25 +2533,21 @@
           "pagination": {
             "type": "object",
             "properties": {
-              "currentPage": {
+              "page": {
                 "type": "integer",
-                "description": "Current page number",
                 "example": 1
+              },
+              "limit": {
+                "type": "integer",
+                "example": 20
+              },
+              "total": {
+                "type": "integer",
+                "example": 42
               },
               "totalPages": {
                 "type": "integer",
-                "description": "Total number of pages",
-                "example": 5
-              },
-              "totalItems": {
-                "type": "integer",
-                "description": "Total number of notifications",
-                "example": 85
-              },
-              "itemsPerPage": {
-                "type": "integer",
-                "description": "Number of items per page",
-                "example": 20
+                "example": 3
               }
             }
           },
@@ -2407,8 +2555,7 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Notification"
-            },
-            "description": "List of user notifications"
+            }
           }
         }
       },
@@ -2417,47 +2564,37 @@
         "properties": {
           "id": {
             "type": "string",
-            "description": "Unique notification identifier",
-            "example": "notif_123456789"
-          },
-          "title": {
-            "type": "string",
-            "description": "Notification title in Arabic",
-            "example": "تأكيد حجز الشاليه"
-          },
-          "message": {
-            "type": "string",
-            "description": "Notification message content",
-            "example": "تم تأكيد حجزك للشاليه رقم 15 بتاريخ 20/12/2025. يمكنك مراجعة تفاصيل الحجز في قسم 'حجوزاتي'."
+            "example": "notification_123456"
           },
           "type": {
             "type": "string",
-            "enum": ["general", "reservation", "payment", "event", "maintenance", "security", "promotion"],
-            "description": "Type of notification",
+            "enum": ["reservation", "payment", "membership", "general"],
             "example": "reservation"
+          },
+          "title": {
+            "type": "string",
+            "example": "تأكيد الحجز"
+          },
+          "message": {
+            "type": "string",
+            "example": "تم تأكيد حجز الشاليه بنجاح"
           },
           "isRead": {
             "type": "boolean",
-            "description": "Whether the notification has been read by the user",
             "example": false
           },
           "createdAt": {
             "type": "string",
             "format": "date-time",
-            "description": "Notification creation timestamp",
-            "example": "2025-07-12T10:30:00Z"
+            "example": "2025-06-30T12:00:00Z"
           },
-          "actionData": {
+          "relatedEntityType": {
             "type": "string",
-            "nullable": true,
-            "description": "Optional action data for navigation (e.g., reservation_15, payment_250)",
-            "example": "reservation_15"
+            "example": "chalet_booking"
           },
-          "imageUrl": {
+          "relatedEntityId": {
             "type": "string",
-            "nullable": true,
-            "description": "Optional notification image URL",
-            "example": "https://api.policeclub.kw/images/notifications/notif_123.jpg"
+            "example": "booking_123456"
           }
         }
       },
@@ -2470,16 +2607,10 @@
           },
           "message": {
             "type": "string",
-            "example": "تم تحديد الإشعار كمقروء"
-          },
-          "notificationId": {
-            "type": "string",
-            "description": "ID of the notification that was marked as read",
-            "example": "notif_123456789"
+            "example": "تم تحديث الإشعار بنجاح"
           }
         }
       },
-
       "ChaletReservationsResponse": {
         "type": "object",
         "properties": {
@@ -2490,31 +2621,26 @@
           "pagination": {
             "type": "object",
             "properties": {
-              "currentPage": {
+              "page": {
                 "type": "integer",
-                "description": "Current page number",
                 "example": 1
+              },
+              "limit": {
+                "type": "integer",
+                "example": 10
+              },
+              "total": {
+                "type": "integer",
+                "example": 5
               },
               "totalPages": {
                 "type": "integer",
-                "description": "Total number of pages",
-                "example": 2
-              },
-              "totalItems": {
-                "type": "integer",
-                "description": "Total number of chalet reservations",
-                "example": 45
-              },
-              "pageSize": {
-                "type": "integer",
-                "description": "Number of items per page",
-                "example": 50
+                "example": 1
               }
             }
           },
           "reservations": {
             "type": "array",
-            "description": "List of all user chalet reservations",
             "items": {
               "$ref": "#/components/schemas/ChaletReservation"
             }
@@ -2531,31 +2657,26 @@
           "pagination": {
             "type": "object",
             "properties": {
-              "currentPage": {
+              "page": {
                 "type": "integer",
-                "description": "Current page number",
                 "example": 1
+              },
+              "limit": {
+                "type": "integer",
+                "example": 10
+              },
+              "total": {
+                "type": "integer",
+                "example": 3
               },
               "totalPages": {
                 "type": "integer",
-                "description": "Total number of pages",
                 "example": 1
-              },
-              "totalItems": {
-                "type": "integer",
-                "description": "Total number of swimming pool reservations",
-                "example": 30
-              },
-              "pageSize": {
-                "type": "integer",
-                "description": "Number of items per page",
-                "example": 50
               }
             }
           },
           "reservations": {
             "type": "array",
-            "description": "List of all user swimming pool reservations",
             "items": {
               "$ref": "#/components/schemas/SwimmingPoolReservation"
             }
@@ -2567,12 +2688,10 @@
         "description": "A chalet reservation containing complete chalet information and chalet-specific reservation details",
         "properties": {
           "chalet": {
-            "$ref": "#/components/schemas/Chalet",
-            "description": "Complete chalet information"
+            "$ref": "#/components/schemas/Chalets"
           },
           "reservationInfo": {
-            "$ref": "#/components/schemas/ChaletReservationInfo",
-            "description": "Chalet-specific reservation details"
+            "$ref": "#/components/schemas/ChaletReservationInfo"
           }
         },
         "required": ["chalet", "reservationInfo"]
@@ -2582,12 +2701,10 @@
         "description": "A swimming pool reservation containing complete swimming pool information and pool-specific reservation details",
         "properties": {
           "swimmingPool": {
-            "$ref": "#/components/schemas/SwimmingPool",
-            "description": "Complete swimming pool information"
+            "$ref": "#/components/schemas/SwimmingPools"
           },
           "reservationInfo": {
-            "$ref": "#/components/schemas/SwimmingPoolReservationInfo",
-            "description": "Swimming pool-specific reservation details"
+            "$ref": "#/components/schemas/SwimmingPoolReservationInfo"
           }
         },
         "required": ["swimmingPool", "reservationInfo"]
@@ -2598,218 +2715,56 @@
         "properties": {
           "id": {
             "type": "string",
-            "description": "Unique reservation ID",
-            "example": "chalet_reservation_123456789"
+            "example": "reservation_ch_123456"
           },
           "status": {
             "type": "string",
-            "enum": ["draft", "reserved_not_paid", "paid_confirmed", "cancelled", "completed"],
-            "description": "Chalet reservation status",
-            "example": "paid_confirmed"
-          },
-          "bookingType": {
-            "type": "string",
-            "enum": ["weekdays", "weekend", "full_day", "overnight"],
-            "description": "Type of chalet booking period",
-            "example": "weekend"
+            "enum": ["pending", "confirmed", "cancelled", "completed"],
+            "example": "confirmed"
           },
           "startDate": {
             "type": "string",
             "format": "date",
-            "description": "Check-in date",
             "example": "2025-07-15"
           },
           "endDate": {
             "type": "string",
             "format": "date",
-            "description": "Check-out date",
             "example": "2025-07-16"
-          },
-          "checkInTime": {
-            "type": "string",
-            "format": "time",
-            "description": "Check-in time",
-            "example": "15:00"
-          },
-          "checkOutTime": {
-            "type": "string",
-            "format": "time",
-            "description": "Check-out time",
-            "example": "12:00"
-          },
-          "numberOfGuests": {
-            "type": "integer",
-            "description": "Total number of guests",
-            "example": 8
-          },
-          "adultGuests": {
-            "type": "integer",
-            "description": "Number of adult guests",
-            "example": 5
-          },
-          "childGuests": {
-            "type": "integer",
-            "description": "Number of child guests",
-            "example": 3
           },
           "slotId": {
             "type": "string",
-            "description": "Booked time slot ID",
             "example": "slot_chalet_001_20250715"
           },
           "price": {
-            "type": "object",
-            "description": "Pricing information for chalet booking",
-            "properties": {
-              "amount": {
-                "type": "number",
-                "format": "decimal",
-                "description": "Total amount in KWD",
-                "example": 150.000
-              },
-              "currency": {
-                "type": "string",
-                "description": "Currency code",
-                "example": "KWD"
-              },
-              "formatted": {
-                "type": "string",
-                "description": "Formatted price string",
-                "example": "150 د.ك"
-              },
-              "breakdown": {
-                "type": "object",
-                "description": "Price breakdown",
-                "properties": {
-                  "basePrice": {
-                    "type": "number",
-                    "format": "decimal",
-                    "description": "Base chalet price",
-                    "example": 120.000
-                  },
-                  "additionalServices": {
-                    "type": "number",
-                    "format": "decimal",
-                    "description": "Additional services cost",
-                    "example": 30.000
-                  }
-                }
-              }
-            }
+            "type": "number",
+            "example": 75.000
           },
           "invoice": {
             "type": "object",
-            "description": "Invoice information for chalet booking",
             "properties": {
               "invoiceId": {
                 "type": "string",
-                "description": "Unique invoice ID",
-                "example": "inv_chalet_reservation_123456789"
-              },
-              "status": {
-                "type": "string",
-                "enum": ["pending", "paid", "failed", "expired", "cancelled"],
-                "description": "Invoice payment status",
-                "example": "paid"
+                "example": "inv_ch_123456"
               },
               "amount": {
                 "type": "number",
-                "format": "decimal",
-                "description": "Invoice amount in KWD",
-                "example": 150.000
+                "example": 75.000
               },
-              "description": {
-                "type": "string",
-                "description": "Invoice description",
-                "example": "حجز شاليه الياسمين - 15-16 يوليو 2025"
-              },
-              "issuedAt": {
-                "type": "string",
-                "format": "date-time",
-                "description": "Invoice creation timestamp",
-                "example": "2025-06-15T10:30:00Z"
-              },
-              "paidAt": {
-                "type": "string",
-                "format": "date-time",
-                "nullable": true,
-                "description": "Payment completion timestamp",
-                "example": "2025-06-15T11:15:00Z"
-              },
-              "expiryDate": {
-                "type": "string",
-                "format": "date-time",
-                "nullable": true,
-                "description": "Invoice expiry date (if not paid)",
-                "example": "2025-06-22T10:30:00Z"
-              }
+  
             }
-          },
-          "additionalServices": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "serviceName": {
-                  "type": "string",
-                  "description": "Service name",
-                  "example": "إضافة مأكولات"
-                },
-                "price": {
-                  "type": "number",
-                  "format": "decimal",
-                  "description": "Service price",
-                  "example": 30.000
-                }
-              }
-            },
-            "description": "Additional services booked with the chalet",
-            "example": [
-              {"serviceName": "إضافة مأكولات", "price": 30.000}
-            ]
-          },
-          "specialRequests": {
-            "type": "string",
-            "nullable": true,
-            "description": "Special requests for chalet setup",
-            "example": "ترتيب الطاولات للأطفال"
           },
           "membershipNumber": {
             "type": "string",
-            "description": "Member's membership number",
-            "example": "MEMBER123456"
+            "example": "POL2025001"
           },
           "createdAt": {
             "type": "string",
             "format": "date-time",
-            "description": "When the reservation was created",
-            "example": "2025-06-15T10:30:00Z"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "description": "Last modification timestamp",
-            "example": "2025-06-15T11:15:00Z"
-          },
-          "canCancel": {
-            "type": "boolean",
-            "description": "Whether the chalet reservation can be cancelled",
-            "example": true
-          },
-          "canModify": {
-            "type": "boolean",
-            "description": "Whether the chalet reservation can be modified",
-            "example": false
-          },
-          "cancellationDeadline": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true,
-            "description": "Deadline for free cancellation",
-            "example": "2025-07-13T23:59:59Z"
+            "example": "2025-06-30T12:00:00Z"
           }
         },
-        "required": ["id", "status", "startDate", "endDate", "checkInTime", "checkOutTime", "numberOfGuests", "slotId", "price", "invoice", "membershipNumber", "createdAt", "updatedAt"]
+        "required": ["id", "status", "startDate", "endDate", "slotId", "price", "invoice", "membershipNumber", "createdAt"]
       },
       "SwimmingPoolReservationInfo": {
         "type": "object",
@@ -2817,233 +2772,70 @@
         "properties": {
           "id": {
             "type": "string",
-            "description": "Unique reservation ID",
-            "example": "pool_reservation_123456789"
+            "example": "reservation_sp_123456"
           },
           "status": {
             "type": "string",
-            "enum": ["draft", "reserved_not_paid", "paid_confirmed", "cancelled", "completed"],
-            "description": "Swimming pool reservation status",
-            "example": "paid_confirmed"
-          },
-          "bookingType": {
-            "type": "string",
-            "enum": ["morning", "afternoon", "evening", "hourly"],
-            "description": "Type of swimming pool booking period",
-            "example": "morning"
+            "enum": ["pending", "confirmed", "cancelled", "completed"],
+            "example": "confirmed"
           },
           "bookingDate": {
             "type": "string",
             "format": "date",
-            "description": "Swimming date",
             "example": "2025-07-15"
           },
           "startTime": {
             "type": "string",
             "format": "time",
-            "description": "Swimming start time",
-            "example": "09:00"
+            "example": "16:00"
           },
           "endTime": {
             "type": "string",
             "format": "time",
-            "description": "Swimming end time",
-            "example": "11:00"
+            "example": "18:00"
           },
           "duration": {
             "type": "integer",
-            "description": "Swimming duration in minutes",
+            "description": "Duration in minutes",
             "example": 120
-          },
-          "numberOfSwimmers": {
-            "type": "integer",
-            "description": "Number of swimmers",
-            "example": 4
-          },
-          "adultSwimmers": {
-            "type": "integer",
-            "description": "Number of adult swimmers",
-            "example": 2
-          },
-          "childSwimmers": {
-            "type": "integer",
-            "description": "Number of child swimmers",
-            "example": 2
           },
           "slotId": {
             "type": "string",
-            "description": "Booked time slot ID",
-            "example": "slot_pool_001_20250715_0900"
+            "example": "slot_pool_001_20250715_1600"
           },
           "price": {
-            "type": "object",
-            "description": "Pricing information for pool booking",
-            "properties": {
-              "amount": {
-                "type": "number",
-                "format": "decimal",
-                "description": "Total amount in KWD",
-                "example": 25.000
-              },
-              "currency": {
-                "type": "string",
-                "description": "Currency code",
-                "example": "KWD"
-              },
-              "formatted": {
-                "type": "string",
-                "description": "Formatted price string",
-                "example": "25 د.ك"
-              },
-              "breakdown": {
-                "type": "object",
-                "description": "Price breakdown",
-                "properties": {
-                  "basePrice": {
-                    "type": "number",
-                    "format": "decimal",
-                    "description": "Base pool entry price",
-                    "example": 20.000
-                  },
-                  "equipmentRental": {
-                    "type": "number",
-                    "format": "decimal",
-                    "description": "Equipment rental cost",
-                    "example": 5.000
-                  }
-                }
-              }
-            }
+            "type": "number",
+            "example": 15.000
           },
           "invoice": {
             "type": "object",
-            "description": "Invoice information for pool booking",
             "properties": {
               "invoiceId": {
                 "type": "string",
-                "description": "Unique invoice ID",
-                "example": "inv_pool_reservation_123456789"
-              },
-              "status": {
-                "type": "string",
-                "enum": ["pending", "paid", "failed", "expired", "cancelled"],
-                "description": "Invoice payment status",
-                "example": "paid"
+                "example": "inv_sp_123456"
               },
               "amount": {
                 "type": "number",
-                "format": "decimal",
-                "description": "Invoice amount in KWD",
-                "example": 25.000
+                "example": 15.000
               },
-              "description": {
+              "status": {
                 "type": "string",
-                "description": "Invoice description",
-                "example": "حجز المسبح الأولمبي - 15 يوليو 2025 (09:00-11:00)"
-              },
-              "issuedAt": {
-                "type": "string",
-                "format": "date-time",
-                "description": "Invoice creation timestamp",
-                "example": "2025-06-15T10:30:00Z"
-              },
-              "paidAt": {
-                "type": "string",
-                "format": "date-time",
-                "nullable": true,
-                "description": "Payment completion timestamp",
-                "example": "2025-06-15T11:15:00Z"
-              },
-              "expiryDate": {
-                "type": "string",
-                "format": "date-time",
-                "nullable": true,
-                "description": "Invoice expiry date (if not paid)",
-                "example": "2025-06-22T10:30:00Z"
+                "enum": ["pending", "paid", "cancelled"],
+                "example": "paid"
               }
             }
           },
-          "equipmentRental": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "equipmentName": {
-                  "type": "string",
-                  "description": "Equipment name",
-                  "example": "طوافات أطفال"
-                },
-                "quantity": {
-                  "type": "integer",
-                  "description": "Quantity rented",
-                  "example": 2
-                },
-                "price": {
-                  "type": "number",
-                  "format": "decimal",
-                  "description": "Rental price",
-                  "example": 5.000
-                }
-              }
-            },
-            "description": "Swimming equipment rented",
-            "example": [
-              {"equipmentName": "طوافات أطفال", "quantity": 2, "price": 5.000}
-            ]
-          },
-          "swimmingLevel": {
-            "type": "string",
-            "enum": ["beginner", "intermediate", "advanced", "mixed"],
-            "description": "Swimming level of the group",
-            "example": "mixed"
-          },
-          "needsLifeguard": {
-            "type": "boolean",
-            "description": "Whether a lifeguard is requested",
-            "example": true
-          },
-          "specialRequests": {
-            "type": "string",
-            "nullable": true,
-            "description": "Special requests for swimming session",
-            "example": "نحتاج مدرب سباحة للأطفال"
-          },
           "membershipNumber": {
             "type": "string",
-            "description": "Member's membership number",
-            "example": "MEMBER123456"
+            "example": "POL2025001"
           },
           "createdAt": {
             "type": "string",
             "format": "date-time",
-            "description": "When the reservation was created",
-            "example": "2025-06-15T10:30:00Z"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "description": "Last modification timestamp",
-            "example": "2025-06-15T11:15:00Z"
-          },
-          "canCancel": {
-            "type": "boolean",
-            "description": "Whether the pool reservation can be cancelled",
-            "example": true
-          },
-          "canModify": {
-            "type": "boolean",
-            "description": "Whether the pool reservation can be modified",
-            "example": true
-          },
-          "cancellationDeadline": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true,
-            "description": "Deadline for free cancellation",
-            "example": "2025-07-15T07:00:00Z"
+            "example": "2025-06-30T12:00:00Z"
           }
         },
-        "required": ["id", "status", "bookingDate", "startTime", "endTime", "duration", "numberOfSwimmers", "slotId", "price", "invoice", "membershipNumber", "createdAt", "updatedAt"]
+        "required": ["id", "status", "bookingDate", "startTime", "endTime", "duration", "slotId", "price", "invoice", "membershipNumber", "createdAt"]
       }
     }
   }
