@@ -40,6 +40,10 @@
       "description": "Chalet management and availability"
     },
     {
+      "name": "Swimming Pools",
+      "description": "Swimming pool management, availability, and booking"
+    },
+    {
       "name": "Reservations",
       "description": "Booking and reservation management"
     },
@@ -566,7 +570,7 @@
     },
     "/swimming-pools": {
       "get": {
-        "tags": ["Reservations"],
+        "tags": ["Swimming Pools"],
         "summary": "Get List of Swimming Pools",
         "description": "Get paginated list of swimming pools with detailed information including amenities, pricing, and dynamic content",
         "security": [
@@ -627,7 +631,7 @@
     },
     "/swimming-pools/{poolId}/slots": {
       "get": {
-        "tags": ["Reservations"],
+        "tags": ["Swimming Pools"],
         "summary": "Get Available Time Slots for Swimming Pool",
         "description": "Get available time slots for a specific swimming pool with pricing information",
         "security": [
@@ -694,7 +698,7 @@
     },
     "/swimming-pools/book": {
       "post": {
-        "tags": ["Reservations"],
+        "tags": ["Swimming Pools"],
         "summary": "Book Swimming Pool",
         "description": "Create a swimming pool reservation with embedded invoice for payment",
         "security": [
