@@ -219,50 +219,7 @@
         }
       }
     },
-    "/members/subscription": {
-      "get": {
-        "tags": ["Member Management"],
-        "summary": "Check Subscription Status",
-        "description": "Check if the authenticated member has an active subscription and return subscription details",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Subscription status retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SubscriptionResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "User is not a member",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
+   
     "/subscriptions/create": {
       "post": {
         "tags": ["Member Management"],
@@ -344,6 +301,40 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SubscriptionOptionsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/members/subscription": {
+      "get": {
+        "tags": ["Member Management"],
+        "summary": "Get Member Subscription Status",
+        "description": "Get current subscription status for the authenticated member",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionStatusResponse"
                 }
               }
             }
@@ -836,13 +827,8 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {
-                  "phoneNumber": {
-                    "type": "string",
-                    "description": "User's phone number"
-                  }
-                },
-                "required": ["phoneNumber"]
+                "properties": {},
+                "required": []
               }
             }
           }
@@ -871,52 +857,7 @@
         }
       }
     },
-    "/auth/check-id": {
-      "post": {
-        "tags": ["Authentication"],
-        "summary": "Check User State by National ID",
-        "description": "Checks if the user is a member and/or subscriber by national ID. Used on app open.",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "nationalId": {
-                    "type": "string",
-                    "description": "User's national ID"
-                  }
-                },
-                "required": ["nationalId"]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "User state returned",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserStateResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
+
     "/notifications": {
       "get": {
         "tags": ["Notifications"],
@@ -1056,11 +997,11 @@
         }
       }
     },
-    "/chalet-reservations": {
+    "/member/chalets/getAllReservations": {
       "get": {
         "tags": ["Reservations"],
         "summary": "Get all user chalet reservations",
-        "description": "Get all chalet reservations for the authenticated user. Returns complete chalet data with reservation details for local searching and filtering on mobile device.",
+        "description": "Get all chalet reservations for the authenticated user with status filtering and pagination.",
         "security": [
           {
             "bearerAuth": []
@@ -1080,7 +1021,7 @@
             "example": 1
           },
           {
-            "name": "limit",
+            "name": "perPage",
             "in": "query",
             "required": false,
             "schema": {
@@ -1091,6 +1032,18 @@
             },
             "description": "Number of items per page",
             "example": 10
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["all", "pending", "paid", "finished"],
+              "default": "all"
+            },
+            "description": "Filter reservations by status. all: الكل, finished: العميل خرج, pending: في انتظار الدفع, paid: في انتظار التسكين",
+            "example": "all"
           }
         ],
         "responses": {
@@ -1099,7 +1052,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChaletReservationsResponse"
+                  "$ref": "#/components/schemas/ChaletReservationsListResponse"
                 }
               }
             }
@@ -1341,29 +1294,15 @@
             "type": "string",
             "description": "Unique user identifier",
             "example": "user_123456"
-          },
-          "membership": {
-            "type": "object",
-            "properties": {
-              "isMember": {
-                "type": "boolean",
-                "description": "Whether the user is a registered member",
-                "example": true
-              }
-            }
           }
+
         }
       },
       "MemberRegistrationRequest": {
         "type": "object",
         "required": ["civilId", "name", "rank", "department"],
         "properties": {
-          "civilId": {
-            "type": "string",
-            "pattern": "^\\d{12}$",
-            "description": "Kuwait Civil ID (12 digits)",
-            "example": "123456789012"
-          },
+
           "name": {
             "type": "string",
             "description": "Full name in Arabic",
@@ -1375,15 +1314,11 @@
             "description": "Email address",
             "example": "ahmed.alkandari@example.com"
           },
-          "rank": {
+
+          "phoneNumber": {
             "type": "string",
-            "description": "Police rank",
-            "example": "نقيب"
-          },
-          "department": {
-            "type": "string",
-            "description": "Police department",
-            "example": "الأمن العام"
+            "description": "Police phone number",
+            "example": "+96551234567"
           }
         }
       },
@@ -1457,18 +1392,12 @@
       },
       "CreateSubscriptionRequest": {
         "type": "object",
-        "required": ["subscriptionType"],
+        "required": ["subscription_id"],
         "properties": {
-          "subscriptionType": {
-            "type": "string",
-            "enum": ["monthly", "quarterly", "annual"],
-            "description": "Type of subscription",
-            "example": "annual"
-          },
-          "userId": {
-            "type": "string",
-            "description": "User ID for the subscription (optional if using current authenticated user)",
-            "example": "user_123456"
+          "subscription_id": {
+            "type": "integer",
+            "description": "ID of the subscription option to create",
+            "example": 3
           }
         }
       },
@@ -1479,24 +1408,29 @@
             "type": "boolean",
             "example": true
           },
+          "url": {
+            "type": "string",
+            "description": "Payment URL for completing the subscription payment",
+            "example": "https://acceptance.sandbox.tap.company/gosell/v2/payment/tap_process.aspx?chg=Xj%2fukFm8u%2bFLPIF0m%2b1ISiRcy6XcbkEf3VJy6x5F8r4%3d"
+          },
           "subscription": {
             "type": "object",
             "properties": {
               "id": {
-                "type": "integer",
+                "type": "string",
                 "description": "Subscription ID",
-                "example": "sub_123456789"
+                "example": "56"
               },
               "userId": {
                 "type": "string",
                 "description": "User ID",
-                "example": "user_123456"
+                "example": "30"
               },
               "type": {
                 "type": "string",
-                "enum": ["monthly", "quarterly", "annual"],
+                "nullable": true,
                 "description": "Subscription type",
-                "example": "annual"
+                "example": null
               },
               "status": {
                 "type": "string",
@@ -1507,14 +1441,14 @@
               "startDate": {
                 "type": "string",
                 "format": "date-time",
-                "description": "Subscription start date (activated after payment)",
-                "example": "2025-07-01T00:00:00Z"
+                "description": "Subscription start date",
+                "example": "2025-07-19T23:38:18.000000Z"
               },
               "expiryDate": {
                 "type": "string",
                 "format": "date-time",
                 "description": "Subscription expiry date",
-                "example": "2026-06-30T23:59:59Z"
+                "example": "2028-07-19T23:38:18.000000Z"
               },
               "invoice": {
                 "type": "object",
@@ -1522,13 +1456,12 @@
                   "invoiceId": {
                     "type": "string",
                     "description": "Invoice ID for payment",
-                    "example": "inv_sub_123456789"
+                    "example": "2025071921545107"
                   },
                   "amount": {
                     "type": "number",
-                    "format": "decimal",
                     "description": "Subscription amount in KWD",
-                    "example": 25.000
+                    "example": 360
                   },
                   "description": {
                     "type": "string",
@@ -1545,7 +1478,7 @@
                     "type": "string",
                     "format": "date-time",
                     "description": "Invoice expiry date",
-                    "example": "2025-07-07T12:00:00Z"
+                    "example": "2028-07-19T23:38:18.000000Z"
                   }
                 },
                 "description": "Embedded invoice for subscription payment"
@@ -1569,7 +1502,7 @@
                 "id": {
                   "type": "string",
                   "description": "Subscription option ID",
-                  "example": 1
+                  "example": "1"
                 },
                 "name": {
                   "type": "string",
@@ -1584,7 +1517,7 @@
                 "price": {
                   "type": "integer",
                   "description": "Subscription price in KWD",
-                  "example": 25
+                  "example": 50
                 },
                 "extraInformation": {
                   "type": "array",
@@ -1593,36 +1526,73 @@
                     "properties": {
                       "item": {
                         "type": "string",
-                        "description": "Information item name",
-                        "example": "الخصومات"
-                      },
-                      "value": {
-                        "type": "string",
-                        "description": "Information value",
-                        "example": "خصم 10% على جميع الخدمات"
+                        "description": "Information item description",
+                        "example": "دخول جميع مرافق النادي"
                       }
                     }
                   },
                   "description": "Additional information about this subscription option",
                   "example": [
-                    {"item": "الخصومات", "value": "خصم 10% على جميع الخدمات"},
-                    {"item": "عدد الحجوزات", "value": "حجوزات مجانية شهرياً"},
-                    {"item": "المزايا الإضافية", "value": "دعوة مجانية للأحداث الخاصة"}
+                    {"item": "دخول جميع مرافق النادي"},
+                    {"item": "استخدام الصالات الرياضية"},
+                    {"item": "خصومات على الفعاليات"},
+                    {"item": "تذاكر الالعاب المجانية"}
                   ]
                 },
                 "isRecommended": {
                   "type": "boolean",
                   "description": "Whether this option is recommended",
-                  "example": true
+                  "example": false
                 },
                 "description": {
                   "type": "string",
                   "description": "Detailed description of the subscription",
-                  "example": "الاشتراك الأكثر شيوعاً مع مزايا شاملة"
+                  "example": "45.0 د/ك / سنة"
                 }
               }
             },
             "description": "List of available subscription options"
+          }
+        }
+      },
+      "SubscriptionStatusResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "hasSubscription": {
+            "type": "boolean",
+            "description": "Whether the member has an active subscription",
+            "example": true
+          },
+          "subscriptionDetails": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Subscription ID",
+                "example": "sub_123"
+              },
+              "name": {
+                "type": "string",
+                "description": "Subscription name",
+                "example": "اشتراك سنوي"
+              },
+              "expiryDate": {
+                "type": "string",
+                "format": "date",
+                "description": "Subscription expiry date",
+                "example": "2024-12-31"
+              },
+              "status": {
+                "type": "string",
+                "description": "Subscription status",
+                "example": "active"
+              }
+            },
+            "description": "Details of the active subscription (only present if hasSubscription is true)"
           }
         }
       },
@@ -1862,7 +1832,7 @@
         "type": "object",
         "required": ["chaletId", "slotId"],
         "properties": {
-          "chaletId": {
+          "typeId": {
             "type": "string",
             "description": "Chalet ID to book",
             "example": "chalet_001"
@@ -1871,16 +1841,6 @@
             "type": "string",
             "description": "Time slot ID chosen for booking",
             "example": "6"
-          },
-          "comments": {
-            "type": "string",
-            "description": "Additional comments or special requests",
-            "example": "نحتاج كراسي إضافية للأطفال"
-          },
-          "userId": {
-            "type": "string",
-            "description": "User ID for the booking (optional if using current authenticated user)",
-            "example": "user_123456"
           }
         }
       },
@@ -2164,33 +2124,36 @@
                 "slotId": {
                   "type": "string",
                   "description": "Unique slot identifier",
-                  "example": "1"
+                  "example": "3"
                 },
-
-                "from": {
+                "available_date": {
                   "type": "string",
-                  "format": "time",
-                  "description": "Start time (HH:MM)",
-                  "example": "09:00"
+                  "format": "date",
+                  "description": "Available date for this slot",
+                  "example": "2025-07-19"
                 },
-                "to": {
-                  "type": "string",
-                  "format": "time", 
-                  "description": "End time (HH:MM)",
-                  "example": "10:00"
+                "booked_quantities": {
+                  "type": "integer",
+                  "nullable": true,
+                  "description": "Number of booked quantities",
+                  "example": null
+                },
+                "quantity": {
+                  "type": "integer",
+                  "description": "Total quantity/capacity",
+                  "example": 500
                 },
                 "price": {
                   "type": "string",
                   "format": "decimal",
                   "description": "Price for this slot in KWD",
-                  "example": "5.000"
+                  "example": "200.000"
                 },
                 "type": {
                   "type": "string",
                   "description": "Slot type/description",
                   "example": "صباحي"
                 },
-
                 "isAvailable": {
                   "type": "boolean",
                   "description": "Whether this slot is available for booking",
@@ -2204,32 +2167,17 @@
       },
       "SwimmingPoolBookingRequest": {
         "type": "object",
-        "required": ["poolId", "slotId", "numberOfPeople"],
+        "required": ["slotId", "persons"],
         "properties": {
-          "poolId": {
-            "type": "string",
-            "description": "Swimming pool ID to book",
-            "example": "pool_001"
-          },
           "slotId": {
-            "type": "integer",
+            "type": "string",
             "description": "Time slot ID chosen for booking",
-            "example": 1
+            "example": "2"
           },
-          "numberOfPeople": {
+          "persons": {
             "type": "integer",
             "description": "Number of people/swimmers",
-            "example": 8
-          },
-          "comments": {
-            "type": "string",
-            "description": "Additional comments or special requests",
-            "example": "نحتاج مدرب سباحة للأطفال"
-          },
-          "userId": {
-            "type": "string",
-            "description": "User ID for the booking (optional if using current authenticated user)",
-            "example": "user_123456"
+            "example": 5
           }
         }
       },
@@ -2244,7 +2192,7 @@
             "type": "object",
             "properties": {
               "id": {
-                "type": "integer",
+                "type": "string",
                 "description": "Booking ID",
                 "example": "booking_pool_123456"
               },
@@ -2265,12 +2213,14 @@
               },
               "slotId": {
                 "type": "integer",
+                "nullable": true,
                 "description": "Booked slot ID",
                 "example": 1
               },
               "bookingDate": {
                 "type": "string",
                 "format": "date",
+                "nullable": true,
                 "description": "Booking date",
                 "example": "2025-07-15"
               },
@@ -2302,6 +2252,11 @@
                 "description": "Booking status",
                 "example": "pending_payment"
               },
+              "url": {
+                "type": "string",
+                "description": "Payment URL for completing the booking payment",
+                "example": "https://acceptance.sandbox.tap.company/gosell/v2/payment/tap_process.aspx?chg=w%2fPIU2JhegztjAvLUA9q%2fr7c%2fZfax%2bjKtOQLmqINlpA%3d"
+              },
               "invoice": {
                 "type": "object",
                 "properties": {
@@ -2311,10 +2266,9 @@
                     "example": "inv_pool_123456"
                   },
                   "amount": {
-                    "type": "number",
-                    "format": "decimal",
+                    "type": "string",
                     "description": "Booking amount in KWD",
-                    "example": 5.000
+                    "example": "5.000"
                   },
                   "description": {
                     "type": "string",
@@ -2329,6 +2283,8 @@
                   },
                   "expiryDate": {
                     "type": "string",
+                    "nullable": true,
+
                     "format": "date-time",
                     "description": "Invoice expiry date",
                     "example": "2025-07-07T12:00:00Z"
@@ -2606,6 +2562,109 @@
             "example": "تم تحديث الإشعار بنجاح"
           }
         }
+      },
+      "ChaletReservationsListResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "currentPage": {
+                "type": "integer",
+                "example": 1
+              },
+              "totalPages": {
+                "type": "integer",
+                "example": 2
+              },
+              "totalItems": {
+                "type": "integer",
+                "example": 15
+              },
+              "itemsPerPage": {
+                "type": "integer",
+                "example": 10
+              }
+            }
+          },
+          "reservations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimpleReservation"
+            }
+          }
+        }
+      },
+      "SimpleReservation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 7
+          },
+          "member_id": {
+            "type": "integer",
+            "example": 30
+          },
+          "unit_id": {
+            "type": "integer",
+            "nullable": true,
+            "example": null
+          },
+          "admin_id": {
+            "type": "integer",
+            "nullable": true,
+            "example": null
+          },
+          "unit_type_id": {
+            "type": "integer",
+            "example": 1
+          },
+          "availability_id": {
+            "type": "integer",
+            "example": 7
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-07-16T23:00:00.000000Z"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-07-18T23:00:00.000000Z"
+          },
+          "guests": {
+            "type": "integer",
+            "example": 0
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "paid", "finished"],
+            "example": "pending",
+            "description": "pending: في انتظار الدفع, paid: في انتظار التسكين, finished: العميل خرج"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-07-19T10:25:56.000000Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-07-19T10:25:56.000000Z"
+          },
+          "tap_id": {
+            "type": "string",
+            "nullable": true,
+            "example": "chg_TS04A3420251242t5NL1907949"
+          }
+        },
+        "required": ["id", "member_id", "unit_type_id", "availability_id", "start_date", "end_date", "guests", "status", "created_at", "updated_at"]
       },
       "ChaletReservationsResponse": {
         "type": "object",
