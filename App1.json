@@ -40,6 +40,10 @@
       "description": "Chalet management and availability"
     },
     {
+      "name": "Tents",
+      "description": "Tent management and availability"
+    },
+    {
       "name": "Reservations",
       "description": "Booking and reservation management"
     },
@@ -54,6 +58,10 @@
     {
       "name": "News",
       "description": "News and announcements management"
+    },
+    {
+      "name": "Settings",
+      "description": "Application settings and configuration"
     }
   ],
   "paths": {
@@ -346,6 +354,175 @@
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    
+    "/reservations/swimming-pool": {
+      "post": {
+        "tags": ["Reservations"],
+        "summary": "Create a new swimming pool reservation",
+        "description": "Book a swimming pool slot for a member.",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SwimmingPoolReservationRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Swimming pool reservation created successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SwimmingPoolReservationResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid reservation data or slot unavailable",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reservations/swimming-pool/{reservationId}": {
+      "get": {
+        "tags": ["Reservations"],
+        "summary": "Get swimming pool reservation details",
+        "description": "Retrieve details of a specific swimming pool reservation.",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "name": "reservationId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Swimming pool reservation details",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SwimmingPoolReservationResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Reservation not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reservations/chalet": {
+      "post": {
+        "tags": ["Reservations"],
+        "summary": "Create a new chalet reservation",
+        "description": "Book a chalet for a member.",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ChaletReservationRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Chalet reservation created successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ChaletReservationResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid reservation data or chalet unavailable",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reservations/chalet/{reservationId}": {
+      "get": {
+        "tags": ["Reservations"],
+        "summary": "Get chalet reservation details",
+        "description": "Retrieve details of a specific chalet reservation.",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "name": "reservationId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chalet reservation details",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ChaletReservationResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Reservation not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
               }
             }
           }
@@ -1070,6 +1247,191 @@
         }
       }
     },
+    "/member/chalets/getReservation/{id}": {
+      "get": {
+        "tags": ["Reservations"],
+        "summary": "Get single chalet reservation details",
+        "description": "Get detailed information about a specific chalet reservation by ID.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Reservation ID",
+            "example": 127
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chalet reservation details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChaletReservationDetailsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Reservation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/member/swimming-pools/getAllReservations": {
+      "get": {
+        "tags": ["Reservations"],
+        "summary": "Get all user swimming pool reservations",
+        "description": "Get all swimming pool reservations for the authenticated user with status filtering and pagination.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "description": "Page number for pagination",
+            "example": 1
+          },
+          {
+            "name": "perPage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10
+            },
+            "description": "Number of items per page",
+            "example": 10
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["upcoming", "past", "cancelled", "all"],
+              "default": "upcoming"
+            },
+            "description": "Filter reservations by status. upcoming: default, past: past reservations, cancelled: cancelled reservations, all: all reservations",
+            "example": "upcoming"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Swimming pool reservations retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SwimmingPoolReservationsListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/member/swimming-pools/getReservation/{id}": {
+      "get": {
+        "tags": ["Reservations"],
+        "summary": "Get single swimming pool reservation details",
+        "description": "Get detailed information about a specific swimming pool reservation by ID.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Reservation ID",
+            "example": 32
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Swimming pool reservation details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SwimmingPoolReservationDetailsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Reservation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/news": {
       "get": {
         "tags": ["News"],
@@ -1171,6 +1533,556 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/member/subscription/proccess/{id}": {
+      "post": {
+        "tags": ["Payments"],
+        "summary": "Process Subscription Payment",
+        "description": "Generate payment link for subscription payment processing",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Subscription ID",
+            "example": "75"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment link generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionPaymentProcessResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Subscription not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/member/swimming-pools/proccess/{id}": {
+      "post": {
+        "tags": ["Payments"],
+        "summary": "Process Swimming Pool Booking Payment",
+        "description": "Generate payment link for swimming pool booking payment processing",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Swimming pool booking ID",
+            "example": "35"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment link generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SwimmingPoolPaymentProcessResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Swimming pool booking not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/member/chalets/proccess/{id}": {
+      "post": {
+        "tags": ["Payments"],
+        "summary": "Process Chalet Booking Payment",
+        "description": "Generate payment link for chalet booking payment processing",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Chalet booking ID",
+            "example": "34"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment link generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChaletPaymentProcessResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Chalet booking not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings/getBookingTerms": {
+      "get": {
+        "summary": "Get booking terms and conditions",
+        "description": "Retrieve the current booking terms and conditions text",
+        "tags": ["Settings"],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved booking terms",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingTermsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tents": {
+      "get": {
+        "tags": ["Tents"],
+        "summary": "Get List of Tents",
+        "description": "Get paginated list of tents with detailed information including pictures, pricing options, and extra details",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "description": "Page number for pagination",
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tents retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TentsListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tents/{tentId}/slots": {
+      "get": {
+        "tags": ["Tents"],
+        "summary": "Get Tent Details with Slots",
+        "description": "Get detailed information about a specific tent including its slots and availability",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Tent ID to get details for",
+            "example": "2"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tent details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TentDetailsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Tent not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tents/book": {
+      "post": {
+        "tags": ["Tents"],
+        "summary": "Book Tent",
+        "description": "Create a tent reservation using tent ID and slot ID",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TentBookingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Tent booked successfully with invoice",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TentBookingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid booking data or tent not available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User is not a member with active subscription",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/member/tents/proccess/{id}": {
+      "post": {
+        "tags": ["Payments"],
+        "summary": "Process Tent Booking Payment",
+        "description": "Generate payment link for tent booking payment processing",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Tent booking ID",
+            "example": "1"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment link generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TentPaymentProcessResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Tent booking not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/member/tents/getReservation/{id}": {
+      "get": {
+        "tags": ["Reservations"],
+        "summary": "Get single tent reservation details",
+        "description": "Get detailed information about a specific tent reservation by ID.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Tent Reservation ID",
+            "example": "1"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tent reservation details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TentReservationDetailsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Reservation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/member/tents/getAllReservations": {
+      "get": {
+        "tags": ["Reservations"],
+        "summary": "Get all user tent reservations",
+        "description": "Get all tent reservations for the authenticated user with status filtering and pagination.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "description": "Page number for pagination",
+            "example": 1
+          },
+          {
+            "name": "perPage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10
+            },
+            "description": "Number of items per page",
+            "example": 10
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["upcoming", "past", "cancelled", "all"],
+              "default": "upcoming"
+            },
+            "description": "Filter reservations by status. upcoming: default, past: past reservations, cancelled: cancelled reservations, all: all reservations",
+            "example": "upcoming"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tent reservations retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TentReservationsListResponse"
                 }
               }
             }
@@ -1408,11 +2320,6 @@
             "type": "boolean",
             "example": true
           },
-          "url": {
-            "type": "string",
-            "description": "Payment URL for completing the subscription payment",
-            "example": "https://acceptance.sandbox.tap.company/gosell/v2/payment/tap_process.aspx?chg=Xj%2fukFm8u%2bFLPIF0m%2b1ISiRcy6XcbkEf3VJy6x5F8r4%3d"
-          },
           "subscription": {
             "type": "object",
             "properties": {
@@ -1567,32 +2474,40 @@
             "description": "Whether the member has an active subscription",
             "example": true
           },
-          "subscriptionDetails": {
+          "subscription": {
             "type": "object",
+            "nullable": true,
             "properties": {
               "id": {
                 "type": "string",
                 "description": "Subscription ID",
-                "example": "sub_123"
+                "example": "37"
               },
-              "name": {
+              "type": {
                 "type": "string",
-                "description": "Subscription name",
-                "example": "اشتراك سنوي"
+                "description": "Subscription type",
+                "example": "annual"
+              },
+              "startDate": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Subscription start date",
+                "example": "2025-07-27T22:42:15.000000Z"
               },
               "expiryDate": {
                 "type": "string",
-                "format": "date",
+                "format": "date-time",
                 "description": "Subscription expiry date",
-                "example": "2024-12-31"
+                "example": "2027-07-27T22:42:15.000000Z"
               },
               "status": {
                 "type": "string",
+                "enum": ["active", "expired", "suspended"],
                 "description": "Subscription status",
                 "example": "active"
               }
             },
-            "description": "Details of the active subscription (only present if hasSubscription is true)"
+            "description": "Subscription details (null if no subscription)"
           }
         }
       },
@@ -1603,31 +2518,7 @@
             "type": "boolean",
             "example": true
           },
-          "pagination": {
-            "type": "object",
-            "properties": {
-              "currentPage": {
-                "type": "integer",
-                "description": "Current page number",
-                "example": 1
-              },
-              "totalPages": {
-                "type": "integer",
-                "description": "Total number of pages",
-                "example": 1
-              },
-              "totalItems": {
-                "type": "integer",
-                "description": "Total number of types",
-                "example": 3
-              },
-              "itemsPerPage": {
-                "type": "integer",
-                "description": "Number of items per page",
-                "example": 10
-              }
-            }
-          },
+
           "types": {
             "type": "array",
             "items": {
@@ -1910,18 +2801,13 @@
                 "description": "Booking status",
                 "example": "pending_payment"
               },
-              "url": {
-                "type": "string",
-                "description": "Payment URL for completing the booking payment",
-                "example": "https://acceptance.sandbox.tap.company/gosell/v2/payment/tap_process.aspx?chg=w%2fPIU2JhegztjAvLUA9q%2fr7c%2fZfax%2bjKtOQLmqINlpA%3d"
-              },
               "invoice": {
                 "type": "object",
                 "properties": {
                   "invoiceId": {
                     "type": "string",
                     "description": "Invoice ID for payment",
-                    "example": "7"
+                    "example": "34"
                   },
                   "amount": {
                     "type": "string",
@@ -1943,7 +2829,7 @@
                     "type": "string",
                     "format": "date-time",
                     "description": "Invoice expiry date",
-                    "example": "2025-07-18 23:00:00"
+                    "example": "2025-07-23 00:00:00"
                   }
                 },
                 "description": "Embedded invoice for booking payment"
@@ -1959,31 +2845,7 @@
             "type": "boolean",
             "example": true
           },
-          "pagination": {
-            "type": "object",
-            "properties": {
-              "currentPage": {
-                "type": "integer",
-                "description": "Current page number",
-                "example": 1
-              },
-              "totalPages": {
-                "type": "integer",
-                "description": "Total number of pages",
-                "example": 3
-              },
-              "totalItems": {
-                "type": "integer",
-                "description": "Total number of swimming pools",
-                "example": 25
-              },
-              "itemsPerPage": {
-                "type": "integer",
-                "description": "Number of items per page",
-                "example": 10
-              }
-            }
-          },
+
           "pools": {
             "type": "array",
             "items": {
@@ -2252,28 +3114,23 @@
                 "description": "Booking status",
                 "example": "pending_payment"
               },
-              "url": {
-                "type": "string",
-                "description": "Payment URL for completing the booking payment",
-                "example": "https://acceptance.sandbox.tap.company/gosell/v2/payment/tap_process.aspx?chg=w%2fPIU2JhegztjAvLUA9q%2fr7c%2fZfax%2bjKtOQLmqINlpA%3d"
-              },
               "invoice": {
                 "type": "object",
                 "properties": {
                   "invoiceId": {
                     "type": "string",
                     "description": "Invoice ID for payment",
-                    "example": "inv_pool_123456"
+                    "example": "35"
                   },
                   "amount": {
                     "type": "string",
                     "description": "Booking amount in KWD",
-                    "example": "5.000"
+                    "example": "50.000"
                   },
                   "description": {
                     "type": "string",
                     "description": "Invoice description",
-                    "example": "حجز المسبح الأولمبي - 15 يوليو 2025 (09:00-10:00)"
+                    "example": ""
                   },
                   "status": {
                     "type": "string",
@@ -2284,10 +3141,9 @@
                   "expiryDate": {
                     "type": "string",
                     "nullable": true,
-
                     "format": "date-time",
                     "description": "Invoice expiry date",
-                    "example": "2025-07-07T12:00:00Z"
+                    "example": null
                   }
                 },
                 "description": "Embedded invoice for booking payment"
@@ -2340,6 +3196,125 @@
             "type": "string",
             "description": "Payment gateway transaction reference",
             "example": "KNET_REF_123456"
+          }
+        }
+      },
+      "PaymentProcessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "booking": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "description": "Booking ID" },
+              "userId": { "type": "integer", "description": "User ID" },
+              "chaletId": { "type": ["string", "null"], "description": "Chalet ID" },
+              "chaletName": { "type": "string", "description": "Chalet name" },
+              "slotId": { "type": "integer", "description": "Slot ID" },
+              "bookingDate": { "type": "string", "description": "Booking date" },
+              "timeFrom": { "type": "string", "description": "Start time" },
+              "timeTo": { "type": "string", "description": "End time" },
+              "comments": { "type": ["string", "null"], "description": "Comments" },
+              "status": { "type": "string", "description": "Booking status" },
+              "url": { "type": "string", "description": "Payment URL for completing the payment" },
+              "invoice": {
+                "type": "object",
+                "properties": {
+                  "invoiceId": { "type": "string", "description": "Invoice ID" },
+                  "amount": { "type": "string", "description": "Booking amount in KWD" },
+                  "description": { "type": "string", "description": "Invoice description" },
+                  "status": { "type": "string", "description": "Invoice payment status" },
+                  "expiryDate": { "type": "string", "description": "Invoice expiry date" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "SubscriptionPaymentProcessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "url": {
+            "type": "string",
+            "description": "Payment URL for completing the subscription payment",
+            "example": "https://payment.gateway.com/pay/subscription/12345"
+          }
+        }
+      },
+      "ChaletPaymentProcessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "booking": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "description": "Booking ID" },
+              "userId": { "type": "integer", "description": "User ID" },
+              "chaletId": { "type": ["string", "null"], "description": "Chalet ID" },
+              "chaletName": { "type": "string", "description": "Chalet name" },
+              "slotId": { "type": "integer", "description": "Slot ID" },
+              "bookingDate": { "type": "string", "description": "Booking date" },
+              "timeFrom": { "type": "string", "description": "Start time" },
+              "timeTo": { "type": "string", "description": "End time" },
+              "comments": { "type": ["string", "null"], "description": "Comments" },
+              "status": { "type": "string", "description": "Booking status" },
+              "url": { "type": "string", "description": "Payment URL for completing the payment" },
+              "invoice": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "description": "Invoice ID" },
+                  "amount": { "type": "string", "description": "Invoice amount" },
+                  "currency": { "type": "string", "description": "Currency" },
+                  "status": { "type": "string", "description": "Invoice payment status" },
+                  "expiryDate": { "type": "string", "description": "Invoice expiry date" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "SwimmingPoolPaymentProcessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "booking": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "description": "Booking ID" },
+              "userId": { "type": "integer", "description": "User ID" },
+              "poolId": { "type": "string", "description": "Swimming pool ID" },
+              "poolName": { "type": "string", "description": "Swimming pool name" },
+              "slotId": { "type": "integer", "description": "Slot ID" },
+              "bookingDate": { "type": "string", "description": "Booking date" },
+              "timeFrom": { "type": "string", "description": "Start time" },
+              "timeTo": { "type": "string", "description": "End time" },
+              "peopleCount": { "type": "integer", "description": "Number of people" },
+              "status": { "type": "string", "description": "Booking status" },
+              "url": { "type": "string", "description": "Payment URL for completing the payment" },
+              "invoice": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "description": "Invoice ID" },
+                  "amount": { "type": "string", "description": "Invoice amount" },
+                  "currency": { "type": "string", "description": "Currency" },
+                  "status": { "type": "string", "description": "Invoice payment status" },
+                  "expiryDate": { "type": "string", "description": "Invoice expiry date" }
+                }
+              }
+            }
           }
         }
       },
@@ -2482,27 +3457,7 @@
             "type": "boolean",
             "example": true
           },
-          "pagination": {
-            "type": "object",
-            "properties": {
-              "page": {
-                "type": "integer",
-                "example": 1
-              },
-              "limit": {
-                "type": "integer",
-                "example": 20
-              },
-              "total": {
-                "type": "integer",
-                "example": 42
-              },
-              "totalPages": {
-                "type": "integer",
-                "example": 3
-              }
-            }
-          },
+
           "notifications": {
             "type": "array",
             "items": {
@@ -2570,31 +3525,11 @@
             "type": "boolean",
             "example": true
           },
-          "pagination": {
-            "type": "object",
-            "properties": {
-              "currentPage": {
-                "type": "integer",
-                "example": 1
-              },
-              "totalPages": {
-                "type": "integer",
-                "example": 2
-              },
-              "totalItems": {
-                "type": "integer",
-                "example": 15
-              },
-              "itemsPerPage": {
-                "type": "integer",
-                "example": 10
-              }
-            }
-          },
+      
           "reservations": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/SimpleReservation"
+              "$ref": "#/components/schemas/ChaletReservationDetail"
             }
           }
         }
@@ -2666,6 +3601,176 @@
         },
         "required": ["id", "member_id", "unit_type_id", "availability_id", "start_date", "end_date", "guests", "status", "created_at", "updated_at"]
       },
+      "SwimmingPoolReservationsListResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+
+          "reservations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SwimmingPoolReservationDetail"
+            }
+          }
+        }
+      },
+      "SwimmingPoolReservationDetailsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "reservation": {
+            "$ref": "#/components/schemas/SwimmingPoolReservationDetail"
+          }
+        }
+      },
+      "ChaletReservationDetailsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "reservation": {
+            "$ref": "#/components/schemas/ChaletReservationDetail"
+          }
+        }
+      },
+      "SwimmingPoolReservationDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 32
+          },
+          "member_id": {
+            "type": "integer",
+            "example": 58
+          },
+          "pool_availability_id": {
+            "type": "integer",
+            "example": 20
+          },
+          "persons": {
+            "type": "integer",
+            "example": 8
+          },
+          "total_price": {
+            "type": "string",
+            "example": "416.000"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "paid", "finished"],
+            "example": "paid",
+            "description": "pending: في انتظار الدفع, paid: في انتظار التسكين, finished: العميل خرج"
+          },
+          "uuid": {
+            "type": "string",
+            "example": "cfa7e91e-3c5f-4bb0-9325-bd4d71b40df7"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-07-29T03:51:53.000000Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-07-29T03:52:20.000000Z"
+          },
+          "tap_id": {
+            "type": "string",
+            "nullable": true,
+            "example": null
+          },
+          "qrcode": {
+            "type": "string",
+            "example": "https://api256413.policeclubkw.com/api/member/qrcode/pool_reservation/32"
+          }
+        },
+        "required": ["id", "member_id", "pool_availability_id", "persons", "total_price", "status", "uuid", "created_at", "updated_at", "qrcode"]
+      },
+      "ChaletReservationDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 127
+          },
+          "member_id": {
+            "type": "integer",
+            "example": 58
+          },
+          "unit_id": {
+            "type": "integer",
+            "nullable": true,
+            "example": null
+          },
+          "admin_id": {
+            "type": "integer",
+            "nullable": true,
+            "example": null
+          },
+          "unit_type_id": {
+            "type": "integer",
+            "example": 12
+          },
+          "availability_id": {
+            "type": "integer",
+            "example": 35
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-08-14T00:00:00.000000Z"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-08-16T00:00:00.000000Z"
+          },
+          "guests": {
+            "type": "integer",
+            "example": 0
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "paid", "finished"],
+            "example": "paid",
+            "description": "pending: في انتظار الدفع, paid: في انتظار التسكين, finished: العميل خرج"
+          },
+          "uuid": {
+            "type": "string",
+            "example": "743ae6e0-82da-4d6e-8bfd-ee8993b0f8a1"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-07-29T03:52:40.000000Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-07-29T03:53:12.000000Z"
+          },
+          "tap_id": {
+            "type": "string",
+            "nullable": true,
+            "example": null
+          },
+          "qrcode": {
+            "type": "string",
+            "example": "https://api256413.policeclubkw.com/api/member/qrcode/reservation/127"
+          }
+        },
+        "required": ["id", "member_id", "unit_type_id", "availability_id", "start_date", "end_date", "guests", "status", "uuid", "created_at", "updated_at", "qrcode"]
+      },
       "ChaletReservationsResponse": {
         "type": "object",
         "properties": {
@@ -2673,27 +3778,7 @@
             "type": "boolean",
             "example": true
           },
-          "pagination": {
-            "type": "object",
-            "properties": {
-              "page": {
-                "type": "integer",
-                "example": 1
-              },
-              "limit": {
-                "type": "integer",
-                "example": 10
-              },
-              "total": {
-                "type": "integer",
-                "example": 5
-              },
-              "totalPages": {
-                "type": "integer",
-                "example": 1
-              }
-            }
-          },
+
           "reservations": {
             "type": "array",
             "items": {
@@ -2709,27 +3794,7 @@
             "type": "boolean",
             "example": true
           },
-          "pagination": {
-            "type": "object",
-            "properties": {
-              "page": {
-                "type": "integer",
-                "example": 1
-              },
-              "limit": {
-                "type": "integer",
-                "example": 10
-              },
-              "total": {
-                "type": "integer",
-                "example": 3
-              },
-              "totalPages": {
-                "type": "integer",
-                "example": 1
-              }
-            }
-          },
+
           "reservations": {
             "type": "array",
             "items": {
@@ -3121,27 +4186,7 @@
             "type": "boolean",
             "example": true
           },
-          "pagination": {
-            "type": "object",
-            "properties": {
-              "page": {
-                "type": "integer",
-                "example": 1
-              },
-              "limit": {
-                "type": "integer",
-                "example": 10
-              },
-              "total": {
-                "type": "integer",
-                "example": 25
-              },
-              "totalPages": {
-                "type": "integer",
-                "example": 3
-              }
-            }
-          },
+
           "news": {
             "type": "array",
             "items": {
@@ -3230,6 +4275,662 @@
 
         }
       }
+    ,
+    "SwimmingPoolReservationRequest": {
+      "type": "object",
+      "required": ["slotId", "peopleCount"],
+      "properties": {
+        "slotId": { "type": "string", "example": "slot_123" },
+        "peopleCount": { "type": "integer", "example": 3 },
+        "notes": { "type": "string", "example": "Birthday party" }
+      }
+    },
+    "SwimmingPoolReservationResponse": {
+      "type": "object",
+      "properties": {
+        "success": { "type": "boolean", "example": true },
+        "reservation": { "$ref": "#/components/schemas/SwimmingPoolReservation" }
+      }
+    },
+    "ChaletReservationRequest": {
+      "type": "object",
+      "required": ["chaletId", "startDate", "endDate", "peopleCount"],
+      "properties": {
+        "chaletId": { "type": "string", "example": "chalet_789" },
+        "startDate": { "type": "string", "format": "date", "example": "2025-08-01" },
+        "endDate": { "type": "string", "format": "date", "example": "2025-08-03" },
+        "peopleCount": { "type": "integer", "example": 5 },
+        "notes": { "type": "string", "example": "Family trip" }
+      }
+    },
+    "ChaletReservationResponse": {
+      "type": "object",
+      "properties": {
+        "success": { "type": "boolean", "example": true },
+        "reservation": { "$ref": "#/components/schemas/ChaletReservation" }
+      }
+    },
+    "BookingTermsResponse": {
+      "type": "object",
+      "properties": {
+        "success": { 
+          "type": "boolean", 
+          "example": true 
+        },
+        "terms": { 
+          "type": "string", 
+          "example": "هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة، لقد تم توليد هذا النص من مولد النص العربى، حيث يمكنك أن تولد مثل هذا النص أو العديد من النصوص الأخرى إضافة إلى زيادة عدد الحروف التى يولدها التطبيق. إذا كنت تحتاج إلى عدد أكبر من الفقرات يتيح لك مولد النص العربى زيادة عدد الفقرات كما تريد، النص لن يبدو مقسما ولا يحوي أخطاء لغوية." 
+        }
+      }
+    },
+    "TentsListResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "example": true
+        },
+        "pagination": {
+          "type": "object",
+          "properties": {
+            "currentPage": {
+              "type": "integer",
+              "description": "Current page number",
+              "example": 1
+            },
+            "totalPages": {
+              "type": "integer",
+              "description": "Total number of pages",
+              "example": 1
+            },
+            "totalItems": {
+              "type": "integer",
+              "description": "Total number of tents",
+              "example": 9
+            },
+            "itemsPerPage": {
+              "type": "integer",
+              "description": "Number of items per page",
+              "example": 10
+            }
+          }
+        },
+        "tents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/Tent"
+          }
+        }
+      }
+    },
+    "TentDetailsResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "example": true
+        },
+        "id": {
+          "type": "string",
+          "description": "Tent ID",
+          "example": "11"
+        },
+        "name": {
+          "type": "string",
+          "description": "Tent name",
+          "example": "KX1CJ"
+        },
+        "type_id": {
+          "type": "string",
+          "description": "Tent type ID",
+          "example": "2"
+        },
+        "type_name": {
+          "type": "string",
+          "description": "Tent type name",
+          "example": "نوع رقم 1"
+        },
+        "description": {
+          "type": "string",
+          "nullable": true,
+          "description": "Tent description",
+          "example": null
+        },
+        "mainPicture": {
+          "type": "string",
+          "description": "Main tent image URL",
+          "example": "https://ad26526.policeclubkw.com/uploads/tents/"
+        },
+        "pictures": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Additional tent images URLs",
+          "example": [
+            "https://ad26526.policeclubkw.com/uploads/tents/1.jpeg",
+            "https://ad26526.policeclubkw.com/uploads/tents/2.jpeg",
+            "https://ad26526.policeclubkw.com/uploads/tents/3.jpeg",
+            "https://ad26526.policeclubkw.com/uploads/tents/4.jpeg"
+          ]
+        },
+        "priceOptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/TentPriceOption"
+          },
+          "description": "Pricing options for the tent"
+        },
+        "isAvailable": {
+          "type": "boolean",
+          "description": "Whether the tent is available for booking",
+          "example": true
+        },
+        "extraDetails": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/ExtraDetail"
+          },
+          "description": "Dynamic extra details about the tent"
+        }
+      }
+    },
+    "Tent": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Tent ID",
+          "example": "11"
+        },
+        "name": {
+          "type": "string",
+          "description": "Tent name",
+          "example": "KX1CJ"
+        },
+        "type_id": {
+          "type": "string",
+          "description": "Tent type ID",
+          "example": "2"
+        },
+        "type_name": {
+          "type": "string",
+          "description": "Tent type name",
+          "example": "نوع رقم 1"
+        },
+        "description": {
+          "type": "string",
+          "nullable": true,
+          "description": "Tent description",
+          "example": null
+        },
+        "mainPicture": {
+          "type": "string",
+          "description": "Main tent image URL",
+          "example": "https://ad26526.policeclubkw.com/uploads/tents/"
+        },
+        "pictures": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Additional tent images URLs",
+          "example": [
+            "https://ad26526.policeclubkw.com/uploads/tents/1.jpeg",
+            "https://ad26526.policeclubkw.com/uploads/tents/2.jpeg",
+            "https://ad26526.policeclubkw.com/uploads/tents/3.jpeg",
+            "https://ad26526.policeclubkw.com/uploads/tents/4.jpeg"
+          ]
+        },
+        "priceOptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/TentPriceOption"
+          },
+          "description": "Pricing options for the tent"
+        },
+        "isAvailable": {
+          "type": "boolean",
+          "description": "Whether the tent is available for booking",
+          "example": true
+        },
+        "extraDetails": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/ExtraDetail"
+          },
+          "description": "Dynamic extra details about the tent"
+        }
+      }
+    },
+    "ExtraDetail": {
+      "type": "object",
+      "properties": {
+        "item": {
+          "type": "string",
+          "description": "Detail name",
+          "example": "السعة"
+        },
+        "value": {
+          "type": "string",
+          "description": "Detail value",
+          "example": "30"
+        }
+      }
+    },
+    "TentPriceOption": {
+      "type": "object",
+      "properties": {
+        "slotId": {
+          "type": "string",
+          "description": "Unique slot identifier",
+          "example": "40"
+        },
+        "available_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Available date for this slot",
+          "example": "2025-08-16"
+        },
+        "booked_quantities": {
+          "type": "integer",
+          "nullable": true,
+          "description": "Number of booked quantities",
+          "example": null
+        },
+        "quantity": {
+          "type": "integer",
+          "description": "Total quantity/capacity",
+          "example": 5
+        },
+        "is_available": {
+          "type": "boolean",
+          "description": "Whether this slot is available for booking",
+          "example": true
+        },
+        "price": {
+          "type": "string",
+          "format": "decimal",
+          "description": "Price for this slot in KWD",
+          "example": "12.000"
+        },
+        "type": {
+          "type": "string",
+          "description": "Slot type/description",
+          "example": "صباحي"
+        },
+        "countAvailable": {
+          "type": "integer",
+          "description": "Count of available slots",
+          "example": 5
+        }
+      }
+    },
+    "TentBookingRequest": {
+      "type": "object",
+      "required": ["tentId", "slotId"],
+      "properties": {
+        "tentId": {
+          "type": "integer",
+          "description": "Tent ID to book",
+          "example": 11
+        },
+        "slotId": {
+          "type": "integer",
+          "description": "Time slot ID chosen for booking",
+          "example": 39
+        }
+      }
+    },
+    "TentBookingResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "example": true
+        },
+        "booking": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Booking ID",
+              "example": "8"
+            },
+            "userId": {
+              "type": "string",
+              "description": "User ID",
+              "example": "4"
+            },
+            "tentId": {
+              "type": "string",
+              "description": "Tent ID",
+              "example": "11"
+            },
+            "tentName": {
+              "type": "string",
+              "description": "Tent name",
+              "example": "KX1CJ"
+            },
+            "slotId": {
+              "type": "string",
+              "nullable": true,
+              "description": "Booked slot ID",
+              "example": null
+            },
+            "bookingDate": {
+              "type": "string",
+              "nullable": true,
+              "format": "date-time",
+              "description": "Booking date and time",
+              "example": null
+            },
+            "numberOfPeople": {
+              "type": "integer",
+              "description": "Number of people",
+              "example": 5
+            },
+            "startTime": {
+              "type": "string",
+              "format": "time",
+              "description": "Start time",
+              "example": "00:00"
+            },
+            "endTime": {
+              "type": "string",
+              "format": "time",
+              "description": "End time",
+              "example": "00:00"
+            },
+            "comments": {
+              "type": "string",
+              "description": "Additional comments",
+              "example": ""
+            },
+            "status": {
+              "type": "string",
+              "enum": ["pending_payment", "confirmed", "cancelled", "completed"],
+              "description": "Booking status",
+              "example": "pending_payment"
+            },
+            "invoice": {
+              "type": "object",
+              "properties": {
+                "invoiceId": {
+                  "type": "string",
+                  "description": "Invoice ID for payment",
+                  "example": "8"
+                },
+                "amount": {
+                  "type": "string",
+                  "description": "Booking amount in KWD",
+                  "example": "12.000"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Invoice description",
+                  "example": ""
+                },
+                "status": {
+                  "type": "string",
+                  "enum": ["pending", "paid", "expired", "cancelled"],
+                  "description": "Invoice payment status",
+                  "example": "pending"
+                },
+                "expiryDate": {
+                  "type": "string",
+                  "nullable": true,
+                  "format": "date-time",
+                  "description": "Invoice expiry date",
+                  "example": null
+                }
+              },
+              "description": "Embedded invoice for booking payment"
+            }
+          }
+        }
+      }
+    },
+    "TentPaymentProcessResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "example": true
+        },
+        "booking": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Booking ID",
+              "example": "8"
+            },
+            "userId": {
+              "type": "integer",
+              "description": "User ID",
+              "example": 4
+            },
+            "tentId": {
+              "type": "string",
+              "description": "Tent ID",
+              "example": "11"
+            },
+            "tentName": {
+              "type": "string",
+              "description": "Tent name",
+              "example": "KX1CJ"
+            },
+            "slotId": {
+              "type": "string",
+              "nullable": true,
+              "description": "Slot ID",
+              "example": null
+            },
+            "bookingDate": {
+              "type": "string",
+              "nullable": true,
+              "description": "Booking date",
+              "example": null
+            },
+            "numberOfPeople": {
+              "type": "integer",
+              "description": "Number of people",
+              "example": 5
+            },
+            "startTime": {
+              "type": "string",
+              "format": "time",
+              "description": "Start time",
+              "example": "00:00"
+            },
+            "endTime": {
+              "type": "string",
+              "format": "time",
+              "description": "End time",
+              "example": "00:00"
+            },
+            "comments": {
+              "type": "string",
+              "description": "Additional comments",
+              "example": ""
+            },
+            "status": {
+              "type": "string",
+              "description": "Booking status",
+              "example": "pending_payment"
+            },
+            "url": {
+              "type": "string",
+              "description": "Payment URL for completing the payment",
+              "example": "https://kpaytest.com.kw/kpg/PaymentHTTP.htm?param=paymentInit&trandata=..."
+            },
+            "invoice": {
+              "type": "object",
+              "properties": {
+                "invoiceId": {
+                  "type": "string",
+                  "description": "Invoice ID",
+                  "example": "8"
+                },
+                "amount": {
+                  "type": "string",
+                  "description": "Booking amount in KWD",
+                  "example": "12.000"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Invoice description",
+                  "example": ""
+                },
+                "status": {
+                  "type": "string",
+                  "description": "Invoice payment status",
+                  "example": "pending"
+                },
+                "expiryDate": {
+                  "type": "string",
+                  "nullable": true,
+                  "description": "Invoice expiry date",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "TentReservationDetailsResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "example": true
+        },
+        "reservation": {
+          "$ref": "#/components/schemas/TentReservationDetail"
+        }
+      }
+    },
+    "TentReservationsListResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "example": true
+        },
+        "pagination": {
+          "type": "object",
+          "properties": {
+            "currentPage": {
+              "type": "integer",
+              "example": 1
+            },
+            "totalPages": {
+              "type": "integer",
+              "example": 1
+            },
+            "totalItems": {
+              "type": "integer",
+              "example": 3
+            },
+            "itemsPerPage": {
+              "type": "integer",
+              "example": 10
+            }
+          }
+        },
+        "reservations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/TentReservationDetail"
+          }
+        }
+      }
+    },
+    "TentReservationDetail": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "example": 6
+        },
+        "member_id": {
+          "type": "integer",
+          "example": 4
+        },
+        "tent_id": {
+          "type": "integer",
+          "description": "Tent ID",
+          "example": 11
+        },
+        "admin_id": {
+          "type": "integer",
+          "nullable": true,
+          "description": "Admin ID who processed the reservation",
+          "example": null
+        },
+        "tent_type_id": {
+          "type": "integer",
+          "description": "Tent type ID",
+          "example": 2
+        },
+        "tent_availability_id": {
+          "type": "integer",
+          "description": "Tent availability slot ID",
+          "example": 39
+        },
+        "date": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Reservation date",
+          "example": "2025-08-12T00:00:00.000000Z"
+        },
+        "price": {
+          "type": "string",
+          "description": "Reservation price in KWD",
+          "example": "12.000"
+        },
+        "guests": {
+          "type": "integer",
+          "nullable": true,
+          "description": "Number of guests",
+          "example": null
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "paid", "finished", "cancelled"],
+          "example": "pending",
+          "description": "pending: في انتظار الدفع, paid: مدفوع, finished: منتهي, cancelled: ملغية"
+        },
+        "uuid": {
+          "type": "string",
+          "example": "0bc3d1e7-4dd0-47c8-a69c-4b5bb7956509"
+        },
+        "tap_id": {
+          "type": "string",
+          "nullable": true,
+          "description": "TAP payment gateway ID",
+          "example": null
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2025-08-11T09:52:07.000000Z"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2025-08-11T09:52:07.000000Z"
+        },
+        "qrcode": {
+          "type": "string",
+          "description": "QR code URL for the reservation",
+          "example": "https://api256413.policeclubkw.com/api/member/qrcode/tent_reservation/6"
+        }
+      },
+      "required": ["id", "member_id", "tent_id", "admin_id", "tent_type_id", "tent_availability_id", "date", "price", "guests", "status", "uuid", "tap_id", "created_at", "updated_at", "qrcode"]
+    }
     }
   }
 }
