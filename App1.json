@@ -1216,10 +1216,10 @@
             "required": false,
             "schema": {
               "type": "string",
-              "enum": ["all", "pending", "paid", "finished"],
-              "default": "all"
+              "enum": ["upcoming", "past", "cancelled", "all"],
+              "default": "upcoming"
             },
-            "description": "Filter reservations by status. all: الكل, finished: العميل خرج, pending: في انتظار الدفع, paid: في انتظار التسكين",
+            "description": "Filter reservations by status. upcoming: upcoming reservations (default), past: past reservations, cancelled: cancelled reservations, all: all reservations",
             "example": "all"
           }
         ],
