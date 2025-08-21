@@ -1174,11 +1174,11 @@
         }
       }
     },
-    "/member/chalets/getAllReservations": {
+    "/member/getAllReservations": {
       "get": {
         "tags": ["Reservations"],
-        "summary": "Get all user chalet reservations",
-        "description": "Get all chalet reservations for the authenticated user with status filtering and pagination.",
+        "summary": "Get all user reservations (unified)",
+        "description": "Get all reservations (chalets, tents, swimming pools) for the authenticated user with type and status filtering.",
         "security": [
           {
             "bearerAuth": []
@@ -1186,29 +1186,16 @@
         ],
         "parameters": [
           {
-            "name": "page",
+            "name": "type",
             "in": "query",
             "required": false,
             "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "default": 1
+              "type": "string",
+              "enum": ["all", "chalets", "tents", "pools"],
+              "default": "all"
             },
-            "description": "Page number for pagination",
-            "example": 1
-          },
-          {
-            "name": "perPage",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 50,
-              "default": 10
-            },
-            "description": "Number of items per page",
-            "example": 10
+            "description": "Filter reservations by type. all: all types, chalets: chalet reservations only, tents: tent reservations only, pools: swimming pool reservations only",
+            "example": "all"
           },
           {
             "name": "status",
@@ -1220,16 +1207,16 @@
               "default": "upcoming"
             },
             "description": "Filter reservations by status. upcoming: upcoming reservations (default), past: past reservations, cancelled: cancelled reservations, all: all reservations",
-            "example": "all"
+            "example": "upcoming"
           }
         ],
         "responses": {
           "200": {
-            "description": "Chalet reservations retrieved successfully",
+            "description": "All reservations retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChaletReservationsListResponse"
+                  "$ref": "#/components/schemas/UnifiedReservationsResponse"
                 }
               }
             }
@@ -1292,79 +1279,6 @@
           },
           "404": {
             "description": "Reservation not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/member/swimming-pools/getAllReservations": {
-      "get": {
-        "tags": ["Reservations"],
-        "summary": "Get all user swimming pool reservations",
-        "description": "Get all swimming pool reservations for the authenticated user with status filtering and pagination.",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "default": 1
-            },
-            "description": "Page number for pagination",
-            "example": 1
-          },
-          {
-            "name": "perPage",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 50,
-              "default": 10
-            },
-            "description": "Number of items per page",
-            "example": 10
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": ["upcoming", "past", "cancelled", "all"],
-              "default": "upcoming"
-            },
-            "description": "Filter reservations by status. upcoming: default, past: past reservations, cancelled: cancelled reservations, all: all reservations",
-            "example": "upcoming"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Swimming pool reservations retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SwimmingPoolReservationsListResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
             "content": {
               "application/json": {
                 "schema": {
@@ -1718,14 +1632,19 @@
         }
       }
     },
-    "/settings/getBookingTerms": {
+    "/settings/getBookingPoolTerms": {
       "get": {
-        "summary": "Get booking terms and conditions",
-        "description": "Retrieve the current booking terms and conditions text",
+        "summary": "Get swimming pool booking terms and conditions",
+        "description": "Retrieve the current swimming pool booking terms and conditions text",
         "tags": ["Settings"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Successfully retrieved booking terms",
+            "description": "Successfully retrieved swimming pool booking terms",
             "content": {
               "application/json": {
                 "schema": {
@@ -1747,11 +1666,217 @@
         }
       }
     },
+    "/settings/getBookingTerms": {
+      "get": {
+        "summary": "Get chalet booking terms and conditions",
+        "description": "Retrieve the current chalet booking terms and conditions text",
+        "tags": ["Settings"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved chalet booking terms",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingTermsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings/getBookingTentsTerms": {
+      "get": {
+        "summary": "Get tent booking terms and conditions",
+        "description": "Retrieve the current tent booking terms and conditions text",
+        "tags": ["Settings"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved tent booking terms",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingTermsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tents/get_map": {
+      "get": {
+        "tags": ["Tents"],
+        "summary": "Get Tent Map Image",
+        "description": "Get the main map image for the tents area that shows the layout and allows users to select slots",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tent map image URL retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TentMapResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tents/getSlots": {
+      "get": {
+        "tags": ["Tents"],
+        "summary": "Get Available Tent Slots",
+        "description": "Get paginated list of available tent time slots with pricing and availability information",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "description": "Page number for pagination",
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tent slots retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TentSlotsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tents/slots/{slotId}": {
+      "get": {
+        "tags": ["Tents"],
+        "summary": "Get Available Tents for Slot",
+        "description": "Get list of available tents for a specific slot ID with detailed information",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "slotId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Slot ID to get available tents for",
+            "example": "9"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Available tents for slot retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TentsBySlotResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Slot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/tents": {
       "get": {
         "tags": ["Tents"],
-        "summary": "Get List of Tents",
-        "description": "Get paginated list of tents with detailed information including pictures, pricing options, and extra details",
+        "summary": "Get List of Tents (Legacy)",
+        "description": "Legacy endpoint - Get paginated list of tents with detailed information including pictures, pricing options, and extra details",
         "security": [
           {
             "bearerAuth": []
@@ -2016,79 +2141,6 @@
           },
           "404": {
             "description": "Reservation not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/member/tents/getAllReservations": {
-      "get": {
-        "tags": ["Reservations"],
-        "summary": "Get all user tent reservations",
-        "description": "Get all tent reservations for the authenticated user with status filtering and pagination.",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "default": 1
-            },
-            "description": "Page number for pagination",
-            "example": 1
-          },
-          {
-            "name": "perPage",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 50,
-              "default": 10
-            },
-            "description": "Number of items per page",
-            "example": 10
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": ["upcoming", "past", "cancelled", "all"],
-              "default": "upcoming"
-            },
-            "description": "Filter reservations by status. upcoming: default, past: past reservations, cancelled: cancelled reservations, all: all reservations",
-            "example": "upcoming"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Tent reservations retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TentReservationsListResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
             "content": {
               "application/json": {
                 "schema": {
@@ -3534,6 +3586,37 @@
           }
         }
       },
+      "UnifiedReservationsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "chalet_reservations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChaletReservationDetail"
+            },
+            "description": "Array of chalet reservations"
+          },
+          "tent_reservations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TentReservationDetail"
+            },
+            "description": "Array of tent reservations"
+          },
+          "pool_reservations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SwimmingPoolReservationDetail"
+            },
+            "description": "Array of swimming pool reservations"
+          }
+        },
+        "required": ["success", "chalet_reservations", "tent_reservations", "pool_reservations"]
+      },
       "SimpleReservation": {
         "type": "object",
         "properties": {
@@ -4847,6 +4930,169 @@
           }
         }
       }
+    },
+    "TentMapResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "example": true
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the tent map image",
+          "example": "https://ad26526.policeclubkw.com/uploads/tents/map.jpg"
+        }
+      },
+      "required": ["success", "url"]
+    },
+    "TentSlotsResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "example": true
+        },
+        "slots": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/TentSlot"
+          },
+          "description": "List of available tent slots"
+        }
+      },
+      "required": ["success", "slots"]
+    },
+    "TentSlot": {
+      "type": "object",
+      "properties": {
+        "slotId": {
+          "type": "string",
+          "description": "Unique slot identifier",
+          "example": "10"
+        },
+        "available_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Available date for this slot",
+          "example": "2025-08-13"
+        },
+        "booked_quantities": {
+          "type": "integer",
+          "nullable": true,
+          "description": "Number of booked quantities",
+          "example": null
+        },
+        "quantity": {
+          "type": "integer",
+          "description": "Total quantity/capacity",
+          "example": 0
+        },
+        "is_available": {
+          "type": "boolean",
+          "description": "Whether this slot is available for booking",
+          "example": true
+        },
+        "price": {
+          "type": "string",
+          "format": "decimal",
+          "description": "Price for this slot in KWD",
+          "example": "50.000"
+        },
+        "type": {
+          "type": "string",
+          "description": "Slot type/description",
+          "example": "صباحي"
+        },
+        "countAvailable": {
+          "type": "integer",
+          "description": "Count of available slots",
+          "example": 0
+        }
+      },
+      "required": ["slotId", "available_date", "quantity", "is_available", "price", "type", "countAvailable"]
+    },
+    "TentsBySlotResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "example": true
+        },
+        "tents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/TentForSlot"
+          },
+          "description": "List of available tents for the selected slot"
+        }
+      },
+      "required": ["success", "tents"]
+    },
+    "TentForSlot": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Tent ID",
+          "example": "16"
+        },
+        "name": {
+          "type": "string",
+          "description": "Tent name",
+          "example": "Vip 1"
+        },
+        "type_id": {
+          "type": "string",
+          "description": "Tent type ID",
+          "example": "3"
+        },
+        "type_name": {
+          "type": "string",
+          "description": "Tent type name",
+          "example": "Vip"
+        },
+        "description": {
+          "type": "string",
+          "nullable": true,
+          "description": "Tent description",
+          "example": null
+        },
+        "mainPicture": {
+          "type": "string",
+          "format": "uri",
+          "description": "Main tent image URL",
+          "example": "https://ad26526.policeclubkw.com/uploads/tents/1754918053.jpeg"
+        },
+        "pictures": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "description": "Additional tent images URLs",
+          "example": [
+            "https://ad26526.policeclubkw.com/uploads/tents/1.jpeg",
+            "https://ad26526.policeclubkw.com/uploads/tents/2.jpeg",
+            "https://ad26526.policeclubkw.com/uploads/tents/3.jpeg",
+            "https://ad26526.policeclubkw.com/uploads/tents/4.jpeg"
+          ]
+        },
+        "isAvailable": {
+          "type": "boolean",
+          "description": "Whether the tent is available for booking",
+          "example": true
+        },
+        "extraDetails": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/ExtraDetail"
+          },
+          "description": "Dynamic extra details about the tent"
+        }
+      },
+      "required": ["id", "name", "type_id", "type_name", "mainPicture", "pictures", "isAvailable", "extraDetails"]
     },
     "TentReservationDetail": {
       "type": "object",
