@@ -44,8 +44,12 @@
       "description": "Tent management and availability"
     },
     {
+      "name": "Swimming Pools",
+      "description": "Swimming pool management and availability"
+    },
+    {
       "name": "Reservations",
-      "description": "Booking and reservation management"
+      "description": "Reservation management and history"
     },
     {
       "name": "Payments",
@@ -363,7 +367,7 @@
     
     "/reservations/swimming-pool": {
       "post": {
-        "tags": ["Reservations"],
+        "tags": ["Swimming Pools"],
         "summary": "Create a new swimming pool reservation",
         "description": "Book a swimming pool slot for a member.",
         "security": [{"bearerAuth": []}],
@@ -405,7 +409,7 @@
     },
     "/reservations/swimming-pool/{reservationId}": {
       "get": {
-        "tags": ["Reservations"],
+        "tags": ["Swimming Pools"],
         "summary": "Get swimming pool reservation details",
         "description": "Retrieve details of a specific swimming pool reservation.",
         "security": [{"bearerAuth": []}],
@@ -447,7 +451,7 @@
     },
     "/reservations/chalet": {
       "post": {
-        "tags": ["Reservations"],
+        "tags": ["Chalets"],
         "summary": "Create a new chalet reservation",
         "description": "Book a chalet for a member.",
         "security": [{"bearerAuth": []}],
@@ -489,7 +493,7 @@
     },
     "/reservations/chalet/{reservationId}": {
       "get": {
-        "tags": ["Reservations"],
+        "tags": ["Chalets"],
         "summary": "Get chalet reservation details",
         "description": "Retrieve details of a specific chalet reservation.",
         "security": [{"bearerAuth": []}],
@@ -712,7 +716,7 @@
     },
     "/swimming-pools": {
       "get": {
-        "tags": ["Reservations"],
+        "tags": ["Swimming Pools"],
         "summary": "Get List of Swimming Pools",
         "description": "Get paginated list of swimming pools with detailed information including amenities, pricing, and dynamic content",
         "security": [
@@ -773,7 +777,7 @@
     },
     "/swimming-pools/{poolId}/slots": {
       "get": {
-        "tags": ["Reservations"],
+        "tags": ["Swimming Pools"],
         "summary": "Get Available Time Slots for Swimming Pool",
         "description": "Get available time slots for a specific swimming pool with pricing information",
         "security": [
@@ -840,7 +844,7 @@
     },
     "/swimming-pools/book": {
       "post": {
-        "tags": ["Reservations"],
+        "tags": ["Swimming Pools"],
         "summary": "Book Swimming Pool",
         "description": "Create a swimming pool reservation with embedded invoice for payment",
         "security": [
@@ -1236,7 +1240,7 @@
     },
     "/member/chalets/getReservation/{id}": {
       "get": {
-        "tags": ["Reservations"],
+        "tags": ["Chalets"],
         "summary": "Get single chalet reservation details",
         "description": "Get detailed information about a specific chalet reservation by ID.",
         "security": [
@@ -1292,7 +1296,7 @@
     },
     "/member/swimming-pools/getReservation/{id}": {
       "get": {
-        "tags": ["Reservations"],
+        "tags": ["Swimming Pools"],
         "summary": "Get single swimming pool reservation details",
         "description": "Get detailed information about a specific swimming pool reservation by ID.",
         "security": [
@@ -1466,7 +1470,7 @@
     },
     "/member/subscription/proccess/{id}": {
       "post": {
-        "tags": ["Payments"],
+        "tags": ["Member Management"],
         "summary": "Process Subscription Payment",
         "description": "Generate payment link for subscription payment processing",
         "security": [
@@ -1522,7 +1526,7 @@
     },
     "/member/swimming-pools/proccess/{id}": {
       "post": {
-        "tags": ["Payments"],
+        "tags": ["Swimming Pools"],
         "summary": "Process Swimming Pool Booking Payment",
         "description": "Generate payment link for swimming pool booking payment processing",
         "security": [
@@ -1578,7 +1582,7 @@
     },
     "/member/chalets/proccess/{id}": {
       "post": {
-        "tags": ["Payments"],
+        "tags": ["Chalets"],
         "summary": "Process Chalet Booking Payment",
         "description": "Generate payment link for chalet booking payment processing",
         "security": [
@@ -2042,7 +2046,7 @@
     },
     "/member/tents/proccess/{id}": {
       "post": {
-        "tags": ["Payments"],
+        "tags": ["Tents"],
         "summary": "Process Tent Booking Payment",
         "description": "Generate payment link for tent booking payment processing",
         "security": [
@@ -2098,7 +2102,7 @@
     },
     "/member/tents/getReservation/{id}": {
       "get": {
-        "tags": ["Reservations"],
+        "tags": ["Tents"],
         "summary": "Get single tent reservation details",
         "description": "Get detailed information about a specific tent reservation by ID.",
         "security": [
